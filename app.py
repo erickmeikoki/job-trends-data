@@ -2,6 +2,13 @@ import streamlit as st
 import pandas as pd
 import io
 from utils.data_processor import process_data, generate_sample_schema
+from utils.database import (
+    get_all_job_postings, 
+    add_job_posting, 
+    delete_job_posting, 
+    get_connection_status,
+    add_multiple_job_postings
+)
 from utils.visualizer import (
     plot_jobs_by_month,
     plot_jobs_by_type,
@@ -18,11 +25,25 @@ st.set_page_config(
 
 # Initialize session state variables
 if "data" not in st.session_state:
-    st.session_state.data = None
+    # Try to load data from database
+    db_data = get_all_job_postings()
+    if not db_data.empty:
+        st.session_state.data = process_data(db_data)
+    else:
+        st.session_state.data = None
+
+# Check database connection
+db_connected = get_connection_status()
 
 # Application title
 st.title("Software Engineering Job Posting Tracker")
 st.write("Track and visualize software engineering job trends over time")
+
+# Show database connection status
+if db_connected:
+    st.sidebar.success("✅ Connected to database")
+else:
+    st.sidebar.error("❌ Database connection failed")
 
 # Sidebar for data input and filtering
 st.sidebar.header("Data Management")
@@ -40,11 +61,29 @@ if data_input_method == "Upload CSV file":
         help="File should contain: date, job_title, job_type, company, location, salary"
     )
     
+    # Option to save to database
+    save_to_db = st.sidebar.checkbox("Save to database", value=True, disabled=not db_connected)
+    
     if upload_file is not None:
         try:
             data = pd.read_csv(upload_file)
-            st.session_state.data = process_data(data)
-            st.sidebar.success("Data loaded successfully!")
+            processed_data = process_data(data)
+            
+            # Save to database if requested
+            if save_to_db and db_connected:
+                success_count, error_count = add_multiple_job_postings(processed_data)
+                if error_count > 0:
+                    st.sidebar.warning(f"Added {success_count} job postings, but {error_count} failed.")
+                else:
+                    st.sidebar.success(f"Added {success_count} job postings to database!")
+                
+                # Refresh data from database
+                st.session_state.data = get_all_job_postings()
+                st.sidebar.info("Data loaded from database!")
+            else:
+                st.session_state.data = processed_data
+                st.sidebar.success("Data loaded successfully!")
+                
         except Exception as e:
             st.sidebar.error(f"Error loading data: {e}")
             
@@ -69,6 +108,8 @@ else:  # Manual data entry
         location = st.text_input("Location")
         salary = st.text_input("Salary (optional)")
         
+        save_to_db = st.checkbox("Save to database", value=True, disabled=not db_connected)
+        
         submit_button = st.form_submit_button("Add Job Posting")
         
         if submit_button:
@@ -85,17 +126,36 @@ else:  # Manual data entry
                     'salary': [salary]
                 })
                 
-                # Add to existing data or create new dataframe
-                if st.session_state.data is not None:
-                    st.session_state.data = pd.concat([st.session_state.data, new_entry], ignore_index=True)
-                else:
-                    st.session_state.data = process_data(new_entry)
+                # Save to database if requested
+                if save_to_db and db_connected:
+                    success = add_job_posting(
+                        date=posting_date,
+                        job_title=job_title,
+                        job_type=job_type,
+                        company=company,
+                        location=location,
+                        salary=salary
+                    )
                     
-                st.sidebar.success("Job posting added!")
+                    if success:
+                        st.sidebar.success("Job posting added to database!")
+                        # Refresh data from database
+                        st.session_state.data = get_all_job_postings()
+                    else:
+                        st.sidebar.error("Failed to add job posting to database")
+                else:
+                    # Add to existing data or create new dataframe
+                    if st.session_state.data is not None:
+                        st.session_state.data = pd.concat([st.session_state.data, new_entry], ignore_index=True)
+                    else:
+                        st.session_state.data = process_data(new_entry)
+                        
+                    st.sidebar.success("Job posting added!")
+                
                 st.rerun()
 
 # Filtering options (only shown if data exists)
-if st.session_state.data is not None:
+if st.session_state.data is not None and not st.session_state.data.empty:
     st.sidebar.header("Data Filters")
     
     # Date range filter
@@ -145,8 +205,16 @@ if st.session_state.data is not None:
         filtered_data = filtered_data[filtered_data['company'].isin(selected_companies)]
 
 # Main content - Data Visualization and Analysis
-if st.session_state.data is None:
+if st.session_state.data is None or st.session_state.data.empty:
     st.info("No data available. Please upload a CSV file or add job postings manually.")
+    
+    # Check if database has data
+    if db_connected:
+        db_data = get_all_job_postings()
+        if not db_data.empty:
+            if st.button("Load data from database"):
+                st.session_state.data = db_data
+                st.rerun()
     
     # Show example schema
     st.subheader("Expected Data Format")
