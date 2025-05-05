@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import io
+import re
+import datetime
 from utils.data_processor import process_data, generate_sample_schema
 from utils.database import (
     get_all_job_postings, 
@@ -23,6 +25,62 @@ from utils.predictor import (
     predict_job_type_growth,
     plot_job_forecast,
     plot_job_type_growth_forecast
+)
+# Import new feature modules
+from utils.salary_analyzer import (
+    extract_salary_range,
+    plot_salary_by_job_type,
+    plot_salary_by_region,
+    plot_salary_trends,
+    get_salary_statistics
+)
+from utils.job_comparator import (
+    compare_job_postings_over_time,
+    create_side_by_side_comparison,
+    compare_growth_rates,
+    create_heatmap_comparison
+)
+from utils.skill_tracker import (
+    extract_skills_from_jobs,
+    plot_top_skills,
+    skills_by_job_type,
+    plot_skill_trends,
+    plot_emerging_skills
+)
+from utils.company_analyzer import (
+    analyze_company_hiring_patterns,
+    detect_hiring_surges,
+    plot_hiring_alerts,
+    analyze_company_seasonality,
+    compare_company_job_types
+)
+from utils.market_health import (
+    calculate_job_market_health_index,
+    plot_job_market_health_index,
+    get_market_health_insights,
+    plot_market_health_components,
+    plot_regional_health_comparison
+)
+from utils.live_data import (
+    fetch_job_data_from_api,
+    scrape_jobs_from_website,
+    schedule_data_refresh,
+    import_jobs_from_linkedin_export,
+    import_jobs_from_indeed_export
+)
+from utils.resume_analyzer import (
+    extract_resume_skills,
+    compare_resume_to_market,
+    find_matching_job_types,
+    plot_skill_gap_analysis,
+    generate_skill_improvement_recommendations
+)
+from utils.job_alerts import (
+    create_job_alert,
+    rank_job_matches,
+    extract_user_preferences_from_text,
+    save_user_alert,
+    get_saved_alerts
 )
 
 # Set page configuration
@@ -267,7 +325,15 @@ else:
         "Company Distribution",
         "Geographical Distribution",
         "Remote vs On-site",
-        "Predictions & Forecasts"
+        "Predictions & Forecasts",
+        "Salary Analytics",
+        "Job Comparison",
+        "Skill Demand",
+        "Company Insights",
+        "Market Health",
+        "Live Data",
+        "Resume Analysis",
+        "Job Alerts"
     ])
     
     with tabs[0]:
@@ -543,3 +609,334 @@ else:
                 except Exception as e:
                     st.error(f"Error generating growth insights: {e}")
                     st.info("Try adding more job posting data across a wider time range.")
+                    
+    # New Tabs Implementation
+    with tabs[7]:  # Salary Analytics Tab
+        st.subheader("Salary Analysis")
+        
+        # Process salary data
+        salary_data = display_data.copy()
+        try:
+            salary_data = extract_salary_range(salary_data)
+            
+            # Check if we have any salary data
+            if 'avg_salary' in salary_data.columns and not salary_data['avg_salary'].isna().all():
+                # Display salary statistics
+                salary_stats = get_salary_statistics(salary_data)
+                if salary_stats['has_data']:
+                    stats_col1, stats_col2, stats_col3 = st.columns(3)
+                    
+                    with stats_col1:
+                        st.metric("Average Salary", f"${salary_stats['mean']:,.0f}")
+                    
+                    with stats_col2:
+                        st.metric("Median Salary", f"${salary_stats['median']:,.0f}")
+                    
+                    with stats_col3:
+                        if 'highest_paying_job_type' in salary_stats:
+                            st.metric(
+                                "Highest Paying Job Type", 
+                                salary_stats['highest_paying_job_type']['job_type'],
+                                f"${salary_stats['highest_paying_job_type']['mean_salary']:,.0f}"
+                            )
+                    
+                    # Salary distribution by job type
+                    st.subheader("Salary Distribution by Job Type")
+                    salary_job_fig = plot_salary_by_job_type(salary_data)
+                    st.plotly_chart(salary_job_fig, use_container_width=True)
+                    
+                    # Salary by region
+                    st.subheader("Average Salary by Region")
+                    salary_region_fig = plot_salary_by_region(salary_data)
+                    st.plotly_chart(salary_region_fig, use_container_width=True)
+                    
+                    # Salary trends over time
+                    if len(salary_data['month_year'].unique()) >= 2:
+                        st.subheader("Salary Trends Over Time")
+                        salary_trends_fig = plot_salary_trends(salary_data)
+                        st.plotly_chart(salary_trends_fig, use_container_width=True)
+                else:
+                    st.info("No salary data available in the current dataset.")
+                    st.write("To analyze salaries, add salary information to your job posting data.")
+            else:
+                st.info("No salary data available in the current dataset.")
+                st.write("To analyze salaries, add salary information to your job posting data.")
+        except Exception as e:
+            st.error(f"Error analyzing salary data: {e}")
+            st.info("This may be due to missing or improperly formatted salary information.")
+            
+    with tabs[8]:  # Job Comparison Tab
+        st.subheader("Job Posting Comparison")
+        
+        comparison_col1, comparison_col2 = st.columns([1, 3])
+        
+        with comparison_col1:
+            # Comparison type selection
+            comparison_type = st.radio(
+                "Compare by:",
+                ["Job Type", "Company"],
+                help="Choose whether to compare job types or companies"
+            )
+            
+            if comparison_type == "Job Type":
+                # Job type selection for comparison
+                job_types_for_comparison = st.multiselect(
+                    "Select Job Types to Compare",
+                    options=display_data['job_type'].unique().tolist(),
+                    default=display_data['job_type'].value_counts().nlargest(3).index.tolist()
+                )
+                companies_for_comparison = None
+            else:
+                # Company selection for comparison
+                companies_for_comparison = st.multiselect(
+                    "Select Companies to Compare",
+                    options=display_data['company'].unique().tolist(),
+                    default=display_data['company'].value_counts().nlargest(3).index.tolist()
+                )
+                job_types_for_comparison = None
+            
+            # Comparison visualization type
+            viz_type = st.selectbox(
+                "Visualization Type",
+                ["Trend Over Time", "Side-by-Side", "Growth Rates", "Heatmap"],
+                help="Choose the type of comparative visualization"
+            )
+        
+        with comparison_col2:
+            # Generate the selected comparison visualization
+            try:
+                if viz_type == "Trend Over Time":
+                    fig = compare_job_postings_over_time(
+                        display_data, 
+                        job_types=job_types_for_comparison,
+                        companies=companies_for_comparison
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                
+                elif viz_type == "Side-by-Side":
+                    if comparison_type == "Job Type" and job_types_for_comparison:
+                        fig = create_side_by_side_comparison(
+                            display_data,
+                            items=job_types_for_comparison,
+                            column='job_type'
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                    elif comparison_type == "Company" and companies_for_comparison:
+                        fig = create_side_by_side_comparison(
+                            display_data,
+                            items=companies_for_comparison,
+                            column='company'
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        st.info("Please select items to compare.")
+                
+                elif viz_type == "Growth Rates":
+                    if comparison_type == "Job Type" and job_types_for_comparison:
+                        fig = compare_growth_rates(
+                            display_data,
+                            items=job_types_for_comparison,
+                            column='job_type'
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                    elif comparison_type == "Company" and companies_for_comparison:
+                        fig = compare_growth_rates(
+                            display_data,
+                            items=companies_for_comparison,
+                            column='company'
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        st.info("Please select items to compare.")
+                
+                elif viz_type == "Heatmap":
+                    if comparison_type == "Job Type":
+                        fig = create_heatmap_comparison(display_data, rows='job_type', cols='region')
+                        st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        fig = create_heatmap_comparison(display_data, rows='company', cols='job_type')
+                        st.plotly_chart(fig, use_container_width=True)
+            
+            except Exception as e:
+                st.error(f"Error generating comparison: {e}")
+                st.info("This may be due to insufficient data for comparison. Try selecting different items or visualization type.")
+                
+    with tabs[9]:  # Skill Demand Tab
+        st.subheader("Skill Demand Analysis")
+        
+        # Extract skills from job titles
+        skills_data = display_data.copy()
+        
+        try:
+            # Check if skills already extracted, if not extract them
+            if 'skills' not in skills_data.columns:
+                skills_data = extract_skills_from_jobs(skills_data)
+            
+            # Check if we have any skill data
+            if 'skills' in skills_data.columns and not skills_data['skills'].apply(lambda x: len(x) if isinstance(x, list) else 0).sum() == 0:
+                # Top skills visualization
+                st.subheader("Top Skills in Demand")
+                
+                skill_count_fig = plot_top_skills(skills_data, n=15)
+                st.plotly_chart(skill_count_fig, use_container_width=True)
+                
+                # Skills by job type
+                st.subheader("Skills Required by Job Type")
+                skill_job_fig = skills_by_job_type(skills_data)
+                st.plotly_chart(skill_job_fig, use_container_width=True)
+                
+                # Skill trends over time
+                if len(skills_data['month_year'].unique()) >= 2:
+                    st.subheader("Skill Popularity Trends")
+                    skill_trend_fig = plot_skill_trends(skills_data)
+                    st.plotly_chart(skill_trend_fig, use_container_width=True)
+                
+                # Emerging skills 
+                if len(skills_data['month_year'].unique()) >= 2:
+                    st.subheader("Emerging Skills")
+                    emerging_fig = plot_emerging_skills(skills_data)
+                    st.plotly_chart(emerging_fig, use_container_width=True)
+                    
+                    st.info("Emerging skills are those showing the highest growth rates in recent job postings. "
+                           "These skills may represent new technologies or methodologies gaining traction in the industry.")
+            else:
+                st.info("No skill data could be extracted from the current dataset.")
+                st.write("The system automatically extracts skills from job titles. Try adding more descriptive job titles or manually add skill information.")
+        
+        except Exception as e:
+            st.error(f"Error analyzing skill demand: {e}")
+            st.info("This may be due to an issue with extracting skills from the current dataset.")
+            
+    with tabs[10]:  # Company Insights Tab
+        st.subheader("Company Hiring Patterns")
+        
+        company_col1, company_col2 = st.columns([1, 3])
+        
+        with company_col1:
+            # Company selection for analysis
+            company_options = ["All Top Companies"] + display_data['company'].value_counts().nlargest(20).index.tolist()
+            selected_company = st.selectbox(
+                "Select Company to Analyze",
+                options=company_options,
+                help="Choose a specific company or view top companies"
+            )
+            
+            # Analysis type selection
+            analysis_type = st.radio(
+                "Analysis Type",
+                ["Hiring Patterns", "Hiring Alerts", "Job Type Distribution", "Seasonality"],
+                help="Choose the type of company analysis"
+            )
+            
+            if analysis_type == "Hiring Patterns" and selected_company == "All Top Companies":
+                top_n = st.slider("Number of Top Companies", 3, 10, 5)
+            else:
+                top_n = 5
+        
+        with company_col2:
+            try:
+                if analysis_type == "Hiring Patterns":
+                    # If specific company selected
+                    if selected_company != "All Top Companies":
+                        fig = analyze_company_hiring_patterns(display_data, company=selected_company)
+                    else:
+                        fig = analyze_company_hiring_patterns(display_data, top_n=top_n)
+                    
+                    st.plotly_chart(fig, use_container_width=True)
+                
+                elif analysis_type == "Hiring Alerts":
+                    # Detect hiring surges
+                    surge_data = detect_hiring_surges(display_data)
+                    
+                    if not surge_data.empty:
+                        fig = plot_hiring_alerts(display_data)
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+                        # Show detailed table of all changes
+                        with st.expander("Detailed Hiring Activity"):
+                            st.dataframe(surge_data.sort_values('pct_change', ascending=False, key=abs))
+                    else:
+                        st.info("No unusual hiring activity detected in the current dataset.")
+                        st.write("This analysis requires at least two consecutive months of data.")
+                
+                elif analysis_type == "Job Type Distribution":
+                    if selected_company != "All Top Companies":
+                        companies_to_analyze = [selected_company]
+                    else:
+                        companies_to_analyze = display_data['company'].value_counts().nlargest(top_n).index.tolist()
+                    
+                    fig = compare_company_job_types(display_data, companies=companies_to_analyze)
+                    st.plotly_chart(fig, use_container_width=True)
+                
+                elif analysis_type == "Seasonality" and selected_company != "All Top Companies":
+                    fig = analyze_company_seasonality(display_data, company=selected_company)
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                    st.info("Seasonal patterns show how a company's hiring varies throughout the year. "
+                           "This can help identify peak hiring seasons and plan job applications accordingly.")
+                elif analysis_type == "Seasonality":
+                    st.info("Please select a specific company to analyze seasonality.")
+            
+            except Exception as e:
+                st.error(f"Error analyzing company insights: {e}")
+                st.info("This may be due to insufficient data for the selected analysis.")
+        
+        # Calculate company growth rates
+        if len(display_data['month_year'].unique()) >= 2:
+            st.subheader("Company Growth Rates")
+            
+            try:
+                growth_df = calculate_company_growth_rates(display_data)
+                
+                if not growth_df.empty:
+                    # Display top growing companies
+                    top_growth_df = growth_df.head(10).reset_index(drop=True)
+                    
+                    growth_col1, growth_col2 = st.columns([3, 2])
+                    
+                    with growth_col1:
+                        # Create bar chart for growth rates
+                        fig = px.bar(
+                            top_growth_df,
+                            y='company',
+                            x='growth_pct',
+                            orientation='h',
+                            color='growth_pct',
+                            color_continuous_scale='RdYlGn',
+                            labels={'company': 'Company', 'growth_pct': 'Growth Rate (%)', 'total_count': 'Total Job Postings'},
+                            title='Top Companies by Growth Rate',
+                            hover_data=['recent_count', 'previous_count', 'total_count']
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                    
+                    with growth_col2:
+                        # Show data table
+                        st.write("#### Company Growth Details")
+                        st.dataframe(
+                            top_growth_df[['company', 'growth_pct', 'recent_count', 'previous_count']].rename(
+                                columns={
+                                    'growth_pct': 'Growth %', 
+                                    'recent_count': 'Recent Jobs', 
+                                    'previous_count': 'Previous Jobs'
+                                }
+                            ),
+                            use_container_width=True
+                        )
+                        
+                        # Show insights
+                        if not top_growth_df.empty:
+                            fastest_growing = top_growth_df.iloc[0]['company']
+                            growth_pct = top_growth_df.iloc[0]['growth_pct']
+                            
+                            st.success(f"🚀 **Fastest growing company:** {fastest_growing} with {growth_pct:.1f}% growth")
+                            
+                            # Check for declining companies
+                            declining = growth_df[growth_df['growth_pct'] < 0]
+                            if not declining.empty:
+                                st.warning(f"📉 **{len(declining)} companies show declining hiring** in recent periods.")
+                else:
+                    st.info("Insufficient data to calculate company growth rates.")
+            
+            except Exception as e:
+                st.error(f"Error calculating company growth rates: {e}")
+                st.info("This analysis requires data from multiple time periods.")
