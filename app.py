@@ -2249,6 +2249,1431 @@ else:
             
             st.dataframe(display_prog, use_container_width=True)
     
+    with tabs[17]:  # Career Path Visualization
+        st.subheader("Career Path Visualization")
+        
+        # Create tabs for different career path features
+        career_tabs = st.tabs([
+            "Career Progression Paths", 
+            "Skills for Transitions", 
+            "Your Personal Roadmap"
+        ])
+        
+        with career_tabs[0]:  # Career Progression Paths
+            st.write("### Common Career Progression Paths")
+            
+            # Define career path data
+            career_paths = {
+                "Frontend Developer": [
+                    "Junior Frontend Developer", 
+                    "Frontend Developer", 
+                    "Senior Frontend Developer", 
+                    "Frontend Lead/Architect", 
+                    "UI/UX Director", 
+                    "CTO"
+                ],
+                "Backend Developer": [
+                    "Junior Backend Developer", 
+                    "Backend Developer", 
+                    "Senior Backend Developer", 
+                    "Backend Lead/Architect", 
+                    "Engineering Director", 
+                    "CTO"
+                ],
+                "Full-Stack": [
+                    "Junior Full-Stack Developer", 
+                    "Full-Stack Developer", 
+                    "Senior Full-Stack Developer", 
+                    "Full-Stack Lead", 
+                    "Engineering Manager", 
+                    "CTO"
+                ],
+                "DevOps": [
+                    "DevOps Engineer", 
+                    "Senior DevOps Engineer", 
+                    "DevOps Lead", 
+                    "Infrastructure Architect", 
+                    "VP of Infrastructure", 
+                    "CTO"
+                ],
+                "Data Engineering": [
+                    "Junior Data Engineer", 
+                    "Data Engineer", 
+                    "Senior Data Engineer", 
+                    "Data Engineering Lead", 
+                    "Director of Data", 
+                    "Chief Data Officer"
+                ],
+                "Machine Learning": [
+                    "ML Engineer", 
+                    "Senior ML Engineer", 
+                    "ML Team Lead", 
+                    "ML Architect", 
+                    "Director of AI", 
+                    "Chief AI Officer"
+                ],
+                "Cybersecurity": [
+                    "Security Analyst", 
+                    "Security Engineer", 
+                    "Senior Security Engineer", 
+                    "Security Architect", 
+                    "CISO"
+                ]
+            }
+            
+            # Job type selection for career path
+            selected_career = st.selectbox(
+                "Select Career Track",
+                options=list(career_paths.keys()),
+                help="Select a career track to view typical progression"
+            )
+            
+            if selected_career:
+                # Display the career path
+                st.write(f"#### {selected_career} Career Progression")
+                
+                # Create a visual representation of the career path
+                path_fig = go.Figure()
+                
+                # Add nodes to the path
+                x_positions = np.linspace(0, 1, len(career_paths[selected_career]))
+                y_positions = [0] * len(career_paths[selected_career])
+                
+                # Add lines connecting nodes
+                for i in range(len(x_positions) - 1):
+                    path_fig.add_shape(
+                        type="line",
+                        x0=x_positions[i],
+                        y0=y_positions[i],
+                        x1=x_positions[i+1],
+                        y1=y_positions[i+1],
+                        line=dict(color="lightblue", width=5)
+                    )
+                
+                # Add nodes
+                path_fig.add_trace(go.Scatter(
+                    x=x_positions,
+                    y=y_positions,
+                    mode="markers+text",
+                    marker=dict(size=30, color="blue"),
+                    text=career_paths[selected_career],
+                    textposition="bottom center",
+                    hoverinfo="text",
+                    name="Career Stages"
+                ))
+                
+                # Update layout
+                path_fig.update_layout(
+                    height=300,
+                    showlegend=False,
+                    xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+                    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+                    margin=dict(l=20, r=20, t=20, b=100)
+                )
+                
+                st.plotly_chart(path_fig, use_container_width=True)
+                
+                # Show typical time frames
+                time_frames = [
+                    "0-2 years", 
+                    "2-4 years", 
+                    "4-7 years", 
+                    "7-10 years", 
+                    "10-15 years",
+                    "15+ years"
+                ]
+                
+                # Ensure time_frames matches the length of the career path
+                time_frames = time_frames[:len(career_paths[selected_career])]
+                
+                # Display time frames and positions in columns
+                st.write("#### Typical Timeframes and Responsibilities")
+                
+                # Create a table with positions, time frames, and responsibilities
+                position_data = []
+                responsibilities = [
+                    "Learning fundamentals, working on small features under close supervision",
+                    "Building components independently, contributing to team projects",
+                    "Designing complex features, mentoring juniors, making architectural decisions",
+                    "Leading teams, setting technical direction, making critical design choices",
+                    "Setting department strategy, managing multiple teams, hiring decisions",
+                    "Guiding company-wide technology strategy and innovation"
+                ]
+                
+                for i, position in enumerate(career_paths[selected_career]):
+                    if i < len(time_frames) and i < len(responsibilities):
+                        position_data.append({
+                            "Position": position,
+                            "Typical Timeframe": time_frames[i],
+                            "Key Responsibilities": responsibilities[i]
+                        })
+                
+                position_df = pd.DataFrame(position_data)
+                st.dataframe(position_df, use_container_width=True)
+                
+                # Show branch paths
+                st.write("#### Potential Career Branches")
+                
+                # Define branch paths based on selected career
+                branch_paths = {
+                    "Frontend Developer": ["UI/UX Designer", "Product Manager", "Frontend Consultant"],
+                    "Backend Developer": ["Solutions Architect", "Database Administrator", "API Specialist"],
+                    "Full-Stack": ["Tech Lead", "Startup Founder", "Technical Product Manager"],
+                    "DevOps": ["Site Reliability Engineer", "Cloud Architect", "DevSecOps Specialist"],
+                    "Data Engineering": ["Data Scientist", "Data Architect", "Analytics Engineer"],
+                    "Machine Learning": ["Research Scientist", "AI Product Manager", "ML Ops Specialist"],
+                    "Cybersecurity": ["Penetration Tester", "Security Consultant", "Compliance Manager"]
+                }
+                
+                # Display branch paths for the selected career
+                if selected_career in branch_paths:
+                    branches = branch_paths[selected_career]
+                    
+                    # Create columns for branch paths
+                    branch_cols = st.columns(len(branches))
+                    
+                    for i, branch in enumerate(branches):
+                        with branch_cols[i]:
+                            st.info(f"**{branch}**")
+                            
+                            # Add a brief description for each branch
+                            if branch == "UI/UX Designer":
+                                st.write("Focus on design systems and user experiences")
+                            elif branch == "Product Manager":
+                                st.write("Leverage technical skills to lead product development")
+                            elif branch == "Frontend Consultant":
+                                st.write("Advise companies on frontend architecture and best practices")
+                            elif branch == "Solutions Architect":
+                                st.write("Design enterprise-level technical solutions")
+                            elif branch == "Database Administrator":
+                                st.write("Specialize in database management and optimization")
+                            elif branch == "API Specialist":
+                                st.write("Focus on API design, documentation, and integration")
+                            elif branch == "Tech Lead":
+                                st.write("Lead development teams with hands-on coding")
+                            elif branch == "Startup Founder":
+                                st.write("Launch tech startups leveraging full-stack expertise")
+                            elif branch == "Technical Product Manager":
+                                st.write("Bridge technical and product management")
+                            elif branch == "Site Reliability Engineer":
+                                st.write("Focus on system reliability and performance")
+                            elif branch == "Cloud Architect":
+                                st.write("Design and implement cloud infrastructure solutions")
+                            elif branch == "DevSecOps Specialist":
+                                st.write("Integrate security into DevOps practices")
+                            elif branch == "Data Scientist":
+                                st.write("Focus on advanced analytics and modeling")
+                            elif branch == "Data Architect":
+                                st.write("Design enterprise data infrastructure")
+                            elif branch == "Analytics Engineer":
+                                st.write("Bridge data engineering and data analysis")
+                            elif branch == "Research Scientist":
+                                st.write("Develop novel ML/AI algorithms and techniques")
+                            elif branch == "AI Product Manager":
+                                st.write("Lead AI product development and strategy")
+                            elif branch == "ML Ops Specialist":
+                                st.write("Operationalize and scale ML systems")
+                            elif branch == "Penetration Tester":
+                                st.write("Identify security vulnerabilities through testing")
+                            elif branch == "Security Consultant":
+                                st.write("Advise organizations on security strategies")
+                            elif branch == "Compliance Manager":
+                                st.write("Ensure security compliance with regulations")
+                            else:
+                                st.write("Alternative career path")
+        
+        with career_tabs[1]:  # Skills for Transitions
+            st.write("### Skills Required for Career Transitions")
+            
+            # Define common transitions
+            transitions = [
+                ("Frontend → Full-Stack", "Backend technologies, API design, server management"),
+                ("Backend → Full-Stack", "Modern frontend frameworks, UI/UX principles, responsive design"),
+                ("Full-Stack → DevOps", "CI/CD pipelines, containerization, cloud infrastructure, automation"),
+                ("DevOps → Cloud Architect", "Multi-cloud strategies, cost optimization, enterprise architecture"),
+                ("Backend → Data Engineering", "Data pipelines, ETL processes, distributed computing"),
+                ("Data Engineering → ML Engineering", "Machine learning algorithms, model training, feature engineering"),
+                ("Any Role → Management", "Team leadership, project management, communication, stakeholder management"),
+                ("Developer → Product Manager", "User research, market analysis, product strategy, roadmapping")
+            ]
+            
+            # Create a selection for transitions
+            transition_options = [t[0] for t in transitions]
+            selected_transition = st.selectbox(
+                "Select Career Transition",
+                options=transition_options,
+                help="Select a career transition to see required skills"
+            )
+            
+            # Display the selected transition
+            selected_transition_data = next((t for t in transitions if t[0] == selected_transition), None)
+            
+            if selected_transition_data:
+                st.write(f"#### Skills Needed for {selected_transition_data[0]}")
+                
+                # Display the skills
+                st.info(selected_transition_data[1])
+                
+                # Create a more detailed breakdown of skills required
+                if selected_transition == "Frontend → Full-Stack":
+                    skills_data = {
+                        "Technical Skills": [
+                            "Node.js or Python/Django/Flask for backend",
+                            "RESTful API design and implementation",
+                            "Database design and management (SQL, NoSQL)",
+                            "Authentication and security best practices",
+                            "Server deployment and management"
+                        ],
+                        "Learning Resources": [
+                            "Node.js & Express.js Fundamentals",
+                            "RESTful API Design with Express",
+                            "Database Design for Web Developers",
+                            "Authentication & Authorization in Web Apps",
+                            "Deployment with Docker & AWS/GCP/Azure"
+                        ]
+                    }
+                elif selected_transition == "Backend → Full-Stack":
+                    skills_data = {
+                        "Technical Skills": [
+                            "Modern JavaScript (ES6+)",
+                            "React, Vue, or Angular",
+                            "CSS frameworks (Tailwind, Bootstrap)",
+                            "Responsive design principles",
+                            "Frontend state management"
+                        ],
+                        "Learning Resources": [
+                            "Modern JavaScript for Backend Developers",
+                            "React/Vue/Angular Fundamentals",
+                            "CSS & Frontend Styling Deep Dive",
+                            "Responsive Web Design Masterclass",
+                            "Redux/Vuex/Ngrx State Management"
+                        ]
+                    }
+                elif selected_transition == "Full-Stack → DevOps":
+                    skills_data = {
+                        "Technical Skills": [
+                            "Linux system administration",
+                            "Docker and Kubernetes",
+                            "CI/CD pipelines (Jenkins, GitHub Actions)",
+                            "Infrastructure as Code (Terraform)",
+                            "Monitoring and logging (Prometheus, ELK stack)"
+                        ],
+                        "Learning Resources": [
+                            "Linux Administration Fundamentals",
+                            "Docker & Kubernetes in Production",
+                            "Building CI/CD Pipelines",
+                            "Infrastructure as Code with Terraform",
+                            "Modern Monitoring & Observability"
+                        ]
+                    }
+                elif selected_transition == "DevOps → Cloud Architect":
+                    skills_data = {
+                        "Technical Skills": [
+                            "Multi-cloud architecture patterns",
+                            "Cloud cost optimization",
+                            "Networking and security in the cloud",
+                            "Disaster recovery and high availability",
+                            "Enterprise integration patterns"
+                        ],
+                        "Learning Resources": [
+                            "Multi-Cloud Certification Path",
+                            "FinOps and Cloud Cost Optimization",
+                            "Advanced Cloud Networking & Security",
+                            "Disaster Recovery in the Cloud",
+                            "Enterprise Architecture Foundations"
+                        ]
+                    }
+                elif selected_transition == "Backend → Data Engineering":
+                    skills_data = {
+                        "Technical Skills": [
+                            "Data modeling and database optimization",
+                            "ETL pipeline development",
+                            "Big data technologies (Spark, Hadoop)",
+                            "Data warehousing solutions",
+                            "Data quality and governance"
+                        ],
+                        "Learning Resources": [
+                            "Advanced Data Modeling Techniques",
+                            "Building ETL Pipelines with Python",
+                            "Apache Spark Fundamentals",
+                            "Modern Data Warehousing",
+                            "Data Governance Best Practices"
+                        ]
+                    }
+                elif selected_transition == "Data Engineering → ML Engineering":
+                    skills_data = {
+                        "Technical Skills": [
+                            "Machine learning algorithms and techniques",
+                            "Feature engineering for ML models",
+                            "ML model training and evaluation",
+                            "ML model deployment and serving",
+                            "MLOps practices"
+                        ],
+                        "Learning Resources": [
+                            "Machine Learning Fundamentals",
+                            "Feature Engineering for Machine Learning",
+                            "Model Training and Evaluation in Production",
+                            "MLOps: Deploying ML Models",
+                            "TensorFlow or PyTorch Certification"
+                        ]
+                    }
+                elif selected_transition == "Any Role → Management":
+                    skills_data = {
+                        "Technical Skills": [
+                            "Project management methodologies",
+                            "Team leadership and motivation",
+                            "Strategic planning and roadmapping",
+                            "Performance management and feedback",
+                            "Budget and resource planning"
+                        ],
+                        "Learning Resources": [
+                            "Engineering Management Fundamentals",
+                            "Leading Technical Teams",
+                            "Strategic Planning for Technology Leaders",
+                            "Performance Management and Feedback",
+                            "Finance Basics for Engineering Managers"
+                        ]
+                    }
+                elif selected_transition == "Developer → Product Manager":
+                    skills_data = {
+                        "Technical Skills": [
+                            "User research and requirements gathering",
+                            "Market analysis and competitor research",
+                            "Product strategy and roadmapping",
+                            "Product analytics and metrics",
+                            "Stakeholder management and communication"
+                        ],
+                        "Learning Resources": [
+                            "User Research for Product Managers",
+                            "Market Analysis and Competitive Strategy",
+                            "Product Strategy and Roadmapping",
+                            "Product Analytics and Metrics",
+                            "Stakeholder Management and Communication"
+                        ]
+                    }
+                
+                # Create two columns for the detailed breakdown
+                skill_col1, skill_col2 = st.columns(2)
+                
+                with skill_col1:
+                    st.write("#### Technical Skills Required")
+                    for skill in skills_data["Technical Skills"]:
+                        st.write(f"• {skill}")
+                
+                with skill_col2:
+                    st.write("#### Recommended Learning Resources")
+                    for resource in skills_data["Learning Resources"]:
+                        st.write(f"• {resource}")
+                
+                # Add a timeline for the transition
+                st.write("#### Typical Timeline for Transition")
+                
+                # Create a timeline visualization
+                timeline_fig = go.Figure()
+                
+                # Timeline phases
+                phases = ["Skill Building", "Practical Application", "Transition Phase", "Role Mastery"]
+                durations = ["3-6 months", "3-6 months", "2-3 months", "Ongoing"]
+                descriptions = [
+                    "Learn fundamental skills through courses and tutorials",
+                    "Apply new skills in current role or side projects",
+                    "Begin interviewing or transition to new role internally",
+                    "Continue growing and mastering skills in new role"
+                ]
+                
+                # Add timeline
+                timeline_fig.add_trace(go.Scatter(
+                    x=[0, 1, 2, 3, 4],
+                    y=[0, 0, 0, 0, 0],
+                    mode="markers+lines+text",
+                    line=dict(color="blue", width=4),
+                    marker=dict(size=15, color="blue"),
+                    text=["Start"] + phases,
+                    textposition="top center",
+                    hoverinfo="text",
+                    hovertext=["Start"] + [f"{p} ({d}): {desc}" for p, d, desc in zip(phases, durations, descriptions)]
+                ))
+                
+                # Update layout
+                timeline_fig.update_layout(
+                    height=200,
+                    showlegend=False,
+                    xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+                    yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+                    margin=dict(l=20, r=20, t=20, b=20)
+                )
+                
+                st.plotly_chart(timeline_fig, use_container_width=True)
+                
+                # Add a table with timeline details
+                timeline_data = {
+                    "Phase": phases,
+                    "Duration": durations,
+                    "Description": descriptions,
+                    "Milestone": [
+                        "Complete courses in key technologies",
+                        "Build portfolio projects showcasing new skills",
+                        "Start interviewing for new roles",
+                        "Successfully perform in new role"
+                    ]
+                }
+                
+                timeline_df = pd.DataFrame(timeline_data)
+                st.dataframe(timeline_df, use_container_width=True)
+        
+        with career_tabs[2]:  # Your Personal Roadmap
+            st.write("### Create Your Personal Career Roadmap")
+            
+            # Form for creating a personal career roadmap
+            roadmap_col1, roadmap_col2 = st.columns(2)
+            
+            with roadmap_col1:
+                # Current position
+                current_position = st.text_input(
+                    "Current Position",
+                    help="Enter your current job title"
+                )
+                
+                # Years of experience
+                years_experience = st.number_input(
+                    "Years of Experience",
+                    min_value=0,
+                    max_value=30,
+                    value=3,
+                    help="Enter your years of experience in tech"
+                )
+                
+                # Current skills
+                current_skills = st.text_area(
+                    "Current Skills (comma-separated)",
+                    help="Enter your current technical skills, separated by commas"
+                )
+                
+                # Target position
+                target_position = st.text_input(
+                    "Target Position",
+                    help="Enter the job title you want to achieve"
+                )
+                
+                # Timeline
+                target_timeline = st.slider(
+                    "Timeline (years)",
+                    min_value=1,
+                    max_value=10,
+                    value=3,
+                    help="How many years do you plan to achieve your target position"
+                )
+            
+            with roadmap_col2:
+                # Target skills to acquire
+                target_skills = st.text_area(
+                    "Target Skills to Acquire (comma-separated)",
+                    help="Enter the skills you need to acquire, separated by commas"
+                )
+                
+                # Learning preferences
+                learning_preference = st.selectbox(
+                    "Preferred Learning Method",
+                    options=["Self-study courses", "Bootcamps", "Academic degrees", "On-the-job learning", "Side projects"],
+                    help="Select your preferred method of learning"
+                )
+                
+                # Work-life balance
+                work_life_balance = st.slider(
+                    "Work-Life Balance Priority (1-10)",
+                    min_value=1,
+                    max_value=10,
+                    value=5,
+                    help="How important is work-life balance to you (1=low, 10=high)"
+                )
+                
+                # Career values
+                career_values = st.multiselect(
+                    "Career Values",
+                    options=["Technical growth", "Leadership", "Compensation", "Work-life balance", "Impact", "Innovation", "Stability"],
+                    default=["Technical growth", "Compensation"],
+                    help="Select the values most important to your career"
+                )
+            
+            # Generate roadmap button
+            if st.button("Generate Personal Career Roadmap"):
+                if current_position and target_position:
+                    st.write("#### Your Personalized Career Roadmap")
+                    
+                    # Process the skills
+                    current_skill_list = [s.strip() for s in current_skills.split(",")] if current_skills else []
+                    target_skill_list = [s.strip() for s in target_skills.split(",")] if target_skills else []
+                    
+                    # Skills to acquire
+                    skills_to_acquire = [s for s in target_skill_list if s not in current_skill_list]
+                    
+                    # Create the roadmap visualization
+                    roadmap_fig = go.Figure()
+                    
+                    # Calculate intermediate steps
+                    steps = min(target_timeline, 3) + 2  # Current, steps (1-3), target
+                    step_years = target_timeline / (steps - 1) if steps > 1 else target_timeline
+                    
+                    # Create positions for the steps
+                    x_positions = list(range(steps))
+                    y_positions = [0] * steps
+                    
+                    # Add lines connecting points
+                    for i in range(len(x_positions) - 1):
+                        roadmap_fig.add_shape(
+                            type="line",
+                            x0=x_positions[i],
+                            y0=y_positions[i],
+                            x1=x_positions[i+1],
+                            y1=y_positions[i+1],
+                            line=dict(color="green", width=4)
+                        )
+                    
+                    # Create milestone names based on current and target positions
+                    if steps == 3:  # Current, 1 intermediate step, target
+                        milestones = [current_position, f"Senior {current_position.split()[-1]}", target_position]
+                    elif steps == 4:  # Current, 2 intermediate steps, target
+                        milestones = [
+                            current_position, 
+                            f"Senior {current_position.split()[-1]}", 
+                            f"Lead {current_position.split()[-1]}", 
+                            target_position
+                        ]
+                    elif steps == 5:  # Current, 3 intermediate steps, target
+                        milestones = [
+                            current_position, 
+                            f"Senior {current_position.split()[-1]}", 
+                            f"Lead {current_position.split()[-1]}",
+                            f"Principal {current_position.split()[-1]}",
+                            target_position
+                        ]
+                    else:
+                        milestones = [current_position, target_position]
+                    
+                    # Add nodes with milestone names
+                    roadmap_fig.add_trace(go.Scatter(
+                        x=x_positions,
+                        y=y_positions,
+                        mode="markers+text",
+                        marker=dict(size=20, color="green"),
+                        text=milestones,
+                        textposition="bottom center",
+                        hoverinfo="text",
+                        name="Career Milestones"
+                    ))
+                    
+                    # Add the year markers
+                    years = [f"Year {int(i*step_years)}" for i in range(steps)]
+                    years[0] = "Now"
+                    
+                    roadmap_fig.add_trace(go.Scatter(
+                        x=x_positions,
+                        y=[0.1] * steps,
+                        mode="text",
+                        text=years,
+                        textposition="top center",
+                        hoverinfo="none",
+                        name="Year"
+                    ))
+                    
+                    # Update layout
+                    roadmap_fig.update_layout(
+                        height=300,
+                        showlegend=False,
+                        xaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+                        yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+                        margin=dict(l=20, r=20, t=20, b=100)
+                    )
+                    
+                    st.plotly_chart(roadmap_fig, use_container_width=True)
+                    
+                    # Display the action plan
+                    st.write("#### Action Plan")
+                    
+                    # Create action plan based on inputs
+                    action_plan = []
+                    
+                    # Distribute skills across milestone periods
+                    distributed_skills = []
+                    if skills_to_acquire:
+                        skills_per_period = max(1, len(skills_to_acquire) // (steps - 1))
+                        for i in range(steps - 1):
+                            start_idx = i * skills_per_period
+                            end_idx = start_idx + skills_per_period
+                            period_skills = skills_to_acquire[start_idx:end_idx] if start_idx < len(skills_to_acquire) else []
+                            distributed_skills.append(period_skills)
+                    
+                    # Generate action items based on the timeline
+                    for i in range(steps - 1):
+                        period_skills = distributed_skills[i] if i < len(distributed_skills) else []
+                        
+                        # Create period action items
+                        if i == 0:  # First period
+                            action_plan.append({
+                                "Timeline": f"Year {i+1} (First year)",
+                                "Goal": f"Develop expertise as {milestones[i]} and begin transition to {milestones[i+1]}",
+                                "Skills Focus": ", ".join(period_skills) if period_skills else "Continue strengthening core skills",
+                                "Suggested Actions": [
+                                    "Take on challenging projects in current role",
+                                    f"Begin studying {period_skills[0] if period_skills else 'new technologies'} via {learning_preference}",
+                                    "Build network within the industry",
+                                    "Create a portfolio project showcasing new skills"
+                                ]
+                            })
+                        elif i == steps - 2:  # Last period
+                            action_plan.append({
+                                "Timeline": f"Year {i+1} (Final phase)",
+                                "Goal": f"Transition from {milestones[i]} to {target_position}",
+                                "Skills Focus": ", ".join(period_skills) if period_skills else "Polish specialized skills",
+                                "Suggested Actions": [
+                                    f"Apply for {target_position} roles internally or externally",
+                                    "Develop leadership and domain expertise",
+                                    "Speak at industry events or publish technical content",
+                                    "Mentor others in your specialty area"
+                                ]
+                            })
+                        else:  # Middle periods
+                            action_plan.append({
+                                "Timeline": f"Year {i+1}",
+                                "Goal": f"Progress from {milestones[i]} to {milestones[i+1]}",
+                                "Skills Focus": ", ".join(period_skills) if period_skills else "Expand technical breadth",
+                                "Suggested Actions": [
+                                    f"Master skills in {period_skills[0] if period_skills else 'your technical area'}",
+                                    "Take on additional responsibilities in current role",
+                                    f"Build projects using {', '.join(period_skills[:2]) if len(period_skills) >= 2 else 'new skills'}",
+                                    "Seek a promotion or new role aligned with your path"
+                                ]
+                            })
+                    
+                    # Display the action plan in a table
+                    action_df = pd.DataFrame(action_plan)
+                    
+                    # Explode the Suggested Actions column for better display
+                    action_display = []
+                    for _, row in action_df.iterrows():
+                        for action in row["Suggested Actions"]:
+                            action_display.append({
+                                "Timeline": row["Timeline"],
+                                "Goal": row["Goal"],
+                                "Skills Focus": row["Skills Focus"],
+                                "Action Item": action
+                            })
+                    
+                    action_display_df = pd.DataFrame(action_display)
+                    st.dataframe(action_display_df, use_container_width=True)
+                    
+                    # Add personalized recommendations based on values
+                    st.write("#### Personalized Recommendations")
+                    
+                    recommendations = []
+                    
+                    if "Technical growth" in career_values:
+                        recommendations.append(
+                            "Focus on depth in your technical specialty before broadening to leadership roles."
+                        )
+                    
+                    if "Leadership" in career_values:
+                        recommendations.append(
+                            "Begin developing mentorship and leadership skills early, even in technical roles."
+                        )
+                    
+                    if "Compensation" in career_values:
+                        recommendations.append(
+                            "Strategic job changes every 2-3 years may accelerate compensation growth more than internal promotions."
+                        )
+                    
+                    if "Work-life balance" in career_values or work_life_balance > 7:
+                        recommendations.append(
+                            "Consider companies known for strong work-life balance; be cautious with startups and FAANG roles."
+                        )
+                    
+                    if "Impact" in career_values:
+                        recommendations.append(
+                            "Consider roles at mission-driven companies or those solving meaningful problems in healthcare, climate, etc."
+                        )
+                    
+                    if "Innovation" in career_values:
+                        recommendations.append(
+                            "Target roles at startups or innovation labs within larger companies to work with cutting-edge tech."
+                        )
+                    
+                    if "Stability" in career_values:
+                        recommendations.append(
+                            "Focus on established companies with strong market positions and sustainable business models."
+                        )
+                    
+                    # Add general recommendations
+                    recommendations.append(
+                        f"With {years_experience} years of experience, focus on deepening expertise rather than frequent role changes."
+                    )
+                    
+                    if target_timeline <= 2:
+                        recommendations.append(
+                            "Your timeline is ambitious. Consider extending it or focusing on fewer new skills at a time."
+                        )
+                    
+                    # Display recommendations
+                    for rec in recommendations:
+                        st.info(rec)
+                    
+                    # Success message
+                    st.success(f"""
+                    Your personalized roadmap from {current_position} to {target_position} is ready! 
+                    Follow the action plan above to achieve your career goals within {target_timeline} years.
+                    """)
+                else:
+                    st.error("Please fill in both your current position and target position.")
+            else:
+                st.info("""
+                Fill in the form above to generate a personalized career roadmap.
+                This will create a step-by-step plan to help you progress from your current position to your target role.
+                """)
+    
+    with tabs[18]:  # Application Tracker
+        st.subheader("Job Application Tracker")
+        
+        # Initialize application tracking in session state if it doesn't exist
+        if "applications" not in st.session_state:
+            st.session_state.applications = pd.DataFrame({
+                'company': ['Example Tech', 'Sample Corp', 'Demo Industries'],
+                'job_title': ['Senior Engineer', 'Full Stack Developer', 'Frontend Engineer'],
+                'application_date': pd.to_datetime(['2025-04-28', '2025-04-15', '2025-05-01']),
+                'status': ['Applied', 'Interview', 'Rejected'],
+                'priority': ['High', 'Medium', 'Low'],
+                'application_url': ['https://example.com/job1', 'https://sample.com/job2', 'https://demo.com/job3'],
+                'contact_name': ['Jane Recruiter', 'John Hiring Manager', ''],
+                'contact_email': ['jane@example.com', 'john@sample.com', ''],
+                'notes': ['Great team culture', 'Complex technical interview', 'Position filled internally'],
+                'next_steps': ['Follow up on 05/15', 'Prepare for technical interview', ''],
+                'next_step_date': pd.to_datetime(['2025-05-15', '2025-05-10', None]),
+                'salary_range': ['$120,000-$140,000', '$110,000-$130,000', '$90,000-$110,000'],
+                'application_method': ['Company Website', 'LinkedIn', 'Referral']
+            })
+        
+        # Create tabs for the application tracker
+        tracker_tabs = st.tabs([
+            "Your Applications", 
+            "Add/Edit Application", 
+            "Application Analytics", 
+            "Reminders"
+        ])
+        
+        with tracker_tabs[0]:  # Your Applications
+            st.write("### Track Your Job Applications")
+            
+            # Filter options for applications
+            filter_col1, filter_col2, filter_col3 = st.columns(3)
+            
+            with filter_col1:
+                status_filter = st.multiselect(
+                    "Filter by Status",
+                    options=sorted(st.session_state.applications['status'].unique().tolist()),
+                    default=[],
+                    help="Select statuses to filter applications"
+                )
+            
+            with filter_col2:
+                priority_filter = st.multiselect(
+                    "Filter by Priority",
+                    options=sorted(st.session_state.applications['priority'].unique().tolist()),
+                    default=[],
+                    help="Select priorities to filter applications"
+                )
+            
+            with filter_col3:
+                date_range_filter = st.date_input(
+                    "Application Date Range",
+                    value=[
+                        st.session_state.applications['application_date'].min().date(),
+                        st.session_state.applications['application_date'].max().date()
+                    ],
+                    help="Select date range for applications"
+                )
+            
+            # Apply filters
+            filtered_apps = st.session_state.applications.copy()
+            
+            if status_filter:
+                filtered_apps = filtered_apps[filtered_apps['status'].isin(status_filter)]
+            
+            if priority_filter:
+                filtered_apps = filtered_apps[filtered_apps['priority'].isin(priority_filter)]
+            
+            if len(date_range_filter) == 2:
+                start_date, end_date = date_range_filter
+                filtered_apps = filtered_apps[
+                    (filtered_apps['application_date'].dt.date >= start_date) & 
+                    (filtered_apps['application_date'].dt.date <= end_date)
+                ]
+            
+            # Display applications with color coding by status
+            if not filtered_apps.empty:
+                # Sort applications by date (newest first)
+                sorted_apps = filtered_apps.sort_values('application_date', ascending=False)
+                
+                # Function to color code based on status
+                def highlight_status(row):
+                    if row['status'] == 'Rejected':
+                        return ['background-color: #ffcccc'] * len(row)
+                    elif row['status'] == 'Offer':
+                        return ['background-color: #ccffcc'] * len(row)
+                    elif row['status'] == 'Interview':
+                        return ['background-color: #ffffcc'] * len(row)
+                    elif row['status'] == 'Applied':
+                        return ['background-color: #cce5ff'] * len(row)
+                    else:
+                        return [''] * len(row)
+                
+                # Function to format dates for display
+                def format_app_date(date):
+                    return date.strftime('%Y-%m-%d') if not pd.isna(date) else ""
+                
+                # Prepare display dataframe
+                display_apps = sorted_apps.copy()
+                display_apps['application_date'] = display_apps['application_date'].apply(format_app_date)
+                display_apps['next_step_date'] = display_apps['next_step_date'].apply(
+                    lambda x: format_app_date(x) if not pd.isna(x) else ""
+                )
+                
+                # Reorder columns for display
+                display_cols = [
+                    'company', 'job_title', 'application_date', 'status', 
+                    'priority', 'next_steps', 'next_step_date'
+                ]
+                
+                # Display applications table with styling
+                st.write(f"Showing {len(filtered_apps)} applications")
+                st.dataframe(
+                    display_apps[display_cols].style.apply(highlight_status, axis=1),
+                    use_container_width=True
+                )
+                
+                # Application details section
+                st.write("### Application Details")
+                
+                # Select application to view details
+                selected_company = st.selectbox(
+                    "Select Application to View Details",
+                    options=sorted_apps['company'] + ' - ' + sorted_apps['job_title'],
+                    help="Select an application to view all details"
+                )
+                
+                if selected_company:
+                    # Extract company and job title from selection
+                    sel_company, sel_job = selected_company.split(' - ', 1)
+                    
+                    # Get the selected application
+                    selected_app = sorted_apps[
+                        (sorted_apps['company'] == sel_company) & 
+                        (sorted_apps['job_title'] == sel_job)
+                    ].iloc[0]
+                    
+                    # Display all details
+                    detail_col1, detail_col2 = st.columns(2)
+                    
+                    with detail_col1:
+                        st.write(f"**Company:** {selected_app['company']}")
+                        st.write(f"**Job Title:** {selected_app['job_title']}")
+                        st.write(f"**Application Date:** {format_app_date(selected_app['application_date'])}")
+                        st.write(f"**Status:** {selected_app['status']}")
+                        st.write(f"**Priority:** {selected_app['priority']}")
+                        st.write(f"**Salary Range:** {selected_app['salary_range']}")
+                        st.write(f"**Application Method:** {selected_app['application_method']}")
+                    
+                    with detail_col2:
+                        if not pd.isna(selected_app['application_url']) and selected_app['application_url']:
+                            st.write(f"**Job URL:** [{selected_app['application_url']}]({selected_app['application_url']})")
+                        
+                        st.write(f"**Contact:** {selected_app['contact_name']}")
+                        
+                        if not pd.isna(selected_app['contact_email']) and selected_app['contact_email']:
+                            st.write(f"**Contact Email:** {selected_app['contact_email']}")
+                        
+                        st.write(f"**Next Steps:** {selected_app['next_steps']}")
+                        
+                        if not pd.isna(selected_app['next_step_date']) and selected_app['next_step_date']:
+                            st.write(f"**Next Step Date:** {format_app_date(selected_app['next_step_date'])}")
+                    
+                    # Notes section
+                    st.write("**Notes:**")
+                    st.info(selected_app['notes'] if not pd.isna(selected_app['notes']) else "No notes")
+                    
+                    # Action buttons
+                    action_col1, action_col2, action_col3 = st.columns(3)
+                    
+                    with action_col1:
+                        if st.button("Update Status"):
+                            st.session_state.edit_application = {
+                                'company': selected_app['company'],
+                                'job_title': selected_app['job_title'],
+                                'mode': 'update'
+                            }
+                            st.rerun()
+                    
+                    with action_col2:
+                        if st.button("Add Reminder"):
+                            # Logic for adding reminder would go here
+                            st.success("Reminder functionality would be implemented here")
+                    
+                    with action_col3:
+                        if st.button("Delete Application"):
+                            # Find the index of the application to delete
+                            app_idx = st.session_state.applications[
+                                (st.session_state.applications['company'] == sel_company) & 
+                                (st.session_state.applications['job_title'] == sel_job)
+                            ].index
+                            
+                            # Delete the application
+                            st.session_state.applications = st.session_state.applications.drop(app_idx).reset_index(drop=True)
+                            st.success(f"Deleted application for {sel_company} - {sel_job}")
+                            st.rerun()
+            else:
+                st.info("No applications match the selected filters.")
+        
+        with tracker_tabs[1]:  # Add/Edit Application
+            st.write("### Add New Job Application")
+            
+            # Check if we're in edit mode from the details page
+            edit_mode = hasattr(st.session_state, 'edit_application')
+            
+            # Application form
+            app_col1, app_col2 = st.columns(2)
+            
+            with app_col1:
+                # Company and job details
+                company = st.text_input(
+                    "Company Name",
+                    value=st.session_state.edit_application['company'] if edit_mode else "",
+                    help="Enter the company name"
+                )
+                
+                job_title = st.text_input(
+                    "Job Title",
+                    value=st.session_state.edit_application['job_title'] if edit_mode else "",
+                    help="Enter the job title"
+                )
+                
+                application_date = st.date_input(
+                    "Application Date",
+                    value=datetime.datetime.now().date(),
+                    help="Date when you applied"
+                )
+                
+                status = st.selectbox(
+                    "Application Status",
+                    options=["Applied", "Rejected", "Interview", "Offer", "Withdrawn", "Pending"],
+                    help="Current status of the application"
+                )
+                
+                priority = st.selectbox(
+                    "Priority",
+                    options=["High", "Medium", "Low"],
+                    help="How important is this application to you"
+                )
+                
+                application_url = st.text_input(
+                    "Job Posting URL",
+                    help="URL of the job posting"
+                )
+                
+                salary_range = st.text_input(
+                    "Salary Range",
+                    help="Expected salary range (if known)"
+                )
+            
+            with app_col2:
+                # Contact and follow-up details
+                contact_name = st.text_input(
+                    "Contact Name",
+                    help="Name of recruiter or hiring manager (if known)"
+                )
+                
+                contact_email = st.text_input(
+                    "Contact Email",
+                    help="Email of recruiter or hiring manager (if known)"
+                )
+                
+                application_method = st.selectbox(
+                    "Application Method",
+                    options=["Company Website", "LinkedIn", "Indeed", "Referral", "Email", "Other"],
+                    help="How did you apply for this job"
+                )
+                
+                next_steps = st.text_input(
+                    "Next Steps",
+                    help="What are the next steps for this application"
+                )
+                
+                next_step_date = st.date_input(
+                    "Next Step Date",
+                    value=None,
+                    help="Date for the next step (if applicable)"
+                )
+                
+                notes = st.text_area(
+                    "Notes",
+                    height=100,
+                    help="Any notes about the application or company"
+                )
+            
+            # Submit button
+            submit_label = "Update Application" if edit_mode else "Add Application"
+            if st.button(submit_label):
+                if company and job_title:
+                    # Create new application entry
+                    new_app = pd.DataFrame({
+                        'company': [company],
+                        'job_title': [job_title],
+                        'application_date': [pd.Timestamp(application_date)],
+                        'status': [status],
+                        'priority': [priority],
+                        'application_url': [application_url],
+                        'contact_name': [contact_name],
+                        'contact_email': [contact_email],
+                        'notes': [notes],
+                        'next_steps': [next_steps],
+                        'next_step_date': [pd.Timestamp(next_step_date) if next_step_date else None],
+                        'salary_range': [salary_range],
+                        'application_method': [application_method]
+                    })
+                    
+                    if edit_mode:
+                        # Find the existing application and update it
+                        existing_idx = st.session_state.applications[
+                            (st.session_state.applications['company'] == st.session_state.edit_application['company']) & 
+                            (st.session_state.applications['job_title'] == st.session_state.edit_application['job_title'])
+                        ].index
+                        
+                        # Delete the old entry and add the new one
+                        st.session_state.applications = st.session_state.applications.drop(existing_idx).reset_index(drop=True)
+                        st.session_state.applications = pd.concat([st.session_state.applications, new_app], ignore_index=True)
+                        
+                        # Clear edit mode
+                        del st.session_state.edit_application
+                        
+                        st.success(f"Updated application for {company} - {job_title}")
+                    else:
+                        # Add to existing applications
+                        st.session_state.applications = pd.concat([st.session_state.applications, new_app], ignore_index=True)
+                        st.success(f"Added new application for {company} - {job_title}")
+                    
+                    # Clear the form (by rerunning the app)
+                    st.rerun()
+                else:
+                    st.error("Please fill in both Company Name and Job Title fields.")
+            
+            # Additional option to upload applications from a CSV
+            st.write("### Import Applications from CSV")
+            
+            upload_apps = st.file_uploader(
+                "Upload Applications CSV",
+                type=["csv"],
+                help="Upload a CSV file with application data"
+            )
+            
+            if upload_apps is not None:
+                try:
+                    apps_df = pd.read_csv(upload_apps)
+                    required_cols = ['company', 'job_title', 'application_date', 'status']
+                    
+                    if all(col in apps_df.columns for col in required_cols):
+                        # Convert date columns
+                        if 'application_date' in apps_df.columns:
+                            apps_df['application_date'] = pd.to_datetime(apps_df['application_date'])
+                        
+                        if 'next_step_date' in apps_df.columns:
+                            apps_df['next_step_date'] = pd.to_datetime(apps_df['next_step_date'])
+                        
+                        # Add to existing applications
+                        st.session_state.applications = pd.concat([st.session_state.applications, apps_df], ignore_index=True)
+                        st.success(f"Imported {len(apps_df)} applications from CSV!")
+                    else:
+                        st.error("CSV file is missing required columns. Please ensure it contains: company, job_title, application_date, status")
+                except Exception as e:
+                    st.error(f"Error importing applications: {e}")
+        
+        with tracker_tabs[2]:  # Application Analytics
+            st.write("### Job Application Analytics")
+            
+            if len(st.session_state.applications) > 0:
+                # Create various analytics visualizations
+                analytics_col1, analytics_col2 = st.columns(2)
+                
+                with analytics_col1:
+                    # Application status breakdown
+                    st.write("#### Application Status Breakdown")
+                    status_counts = st.session_state.applications['status'].value_counts()
+                    
+                    # Create a pie chart
+                    status_fig = px.pie(
+                        values=status_counts.values,
+                        names=status_counts.index,
+                        title="Applications by Status",
+                        color_discrete_sequence=px.colors.qualitative.Set3
+                    )
+                    
+                    status_fig.update_traces(textposition='inside', textinfo='percent+label')
+                    st.plotly_chart(status_fig, use_container_width=True)
+                
+                with analytics_col2:
+                    # Applications over time
+                    st.write("#### Application Timeline")
+                    
+                    # Group by month and count
+                    timeline_data = st.session_state.applications.copy()
+                    timeline_data['month'] = timeline_data['application_date'].dt.to_period('M')
+                    monthly_counts = timeline_data.groupby('month').size().reset_index(name='count')
+                    monthly_counts['month_str'] = monthly_counts['month'].astype(str)
+                    
+                    # Create a line chart
+                    timeline_fig = px.line(
+                        monthly_counts,
+                        x='month_str',
+                        y='count',
+                        markers=True,
+                        title="Applications Over Time",
+                        labels={'month_str': 'Month', 'count': 'Number of Applications'}
+                    )
+                    
+                    st.plotly_chart(timeline_fig, use_container_width=True)
+                
+                # Application method breakdown
+                st.write("#### Application Methods")
+                method_counts = st.session_state.applications['application_method'].value_counts()
+                
+                method_fig = px.bar(
+                    x=method_counts.index,
+                    y=method_counts.values,
+                    title="Applications by Method",
+                    labels={'x': 'Application Method', 'y': 'Number of Applications'},
+                    color=method_counts.values,
+                    color_continuous_scale='Viridis'
+                )
+                
+                st.plotly_chart(method_fig, use_container_width=True)
+                
+                # Success rate analysis
+                st.write("#### Application Success Metrics")
+                
+                success_col1, success_col2, success_col3 = st.columns(3)
+                
+                with success_col1:
+                    # Calculate application success rate
+                    total_apps = len(st.session_state.applications)
+                    interview_count = len(st.session_state.applications[st.session_state.applications['status'] == 'Interview'])
+                    offer_count = len(st.session_state.applications[st.session_state.applications['status'] == 'Offer'])
+                    
+                    interview_rate = (interview_count / total_apps) * 100
+                    offer_rate = (offer_count / total_apps) * 100
+                    
+                    st.metric(
+                        label="Interview Success Rate",
+                        value=f"{interview_rate:.1f}%",
+                        help="Percentage of applications that resulted in interviews"
+                    )
+                
+                with success_col2:
+                    st.metric(
+                        label="Offer Success Rate",
+                        value=f"{offer_rate:.1f}%",
+                        help="Percentage of applications that resulted in offers"
+                    )
+                
+                with success_col3:
+                    # Average response time (if we had the data)
+                    st.metric(
+                        label="Total Applications",
+                        value=total_apps,
+                        help="Total number of job applications tracked"
+                    )
+                
+                # Most effective application methods
+                if 'application_method' in st.session_state.applications.columns:
+                    st.write("#### Most Effective Application Methods")
+                    
+                    # Calculate success rates by method
+                    method_success = st.session_state.applications.groupby('application_method')['status'].apply(
+                        lambda x: ((x == 'Interview').sum() + (x == 'Offer').sum()) / len(x) * 100
+                    ).reset_index(name='success_rate')
+                    
+                    method_success = method_success.sort_values('success_rate', ascending=False)
+                    
+                    # Create bar chart of success rates
+                    method_success_fig = px.bar(
+                        method_success,
+                        x='application_method',
+                        y='success_rate',
+                        title="Success Rate by Application Method",
+                        labels={'application_method': 'Method', 'success_rate': 'Success Rate (%)'},
+                        color='success_rate',
+                        color_continuous_scale='Viridis'
+                    )
+                    
+                    st.plotly_chart(method_success_fig, use_container_width=True)
+                    
+                    # Display insights
+                    if not method_success.empty:
+                        best_method = method_success.iloc[0]['application_method']
+                        best_rate = method_success.iloc[0]['success_rate']
+                        
+                        st.info(f"""
+                        **Insight:** Your most effective application method is **{best_method}** with a 
+                        {best_rate:.1f}% success rate (interviews and offers). Consider focusing more 
+                        on this method for future applications.
+                        """)
+            else:
+                st.info("Add some job applications to see analytics and insights.")
+        
+        with tracker_tabs[3]:  # Reminders
+            st.write("### Application Reminders")
+            
+            # Get applications with upcoming next steps
+            if 'next_step_date' in st.session_state.applications.columns:
+                reminder_apps = st.session_state.applications.copy()
+                
+                # Filter out applications with no next step date
+                reminder_apps = reminder_apps.dropna(subset=['next_step_date'])
+                
+                if not reminder_apps.empty:
+                    # Add days until next step
+                    today = pd.Timestamp(datetime.datetime.now().date())
+                    reminder_apps['days_until'] = (reminder_apps['next_step_date'] - today).dt.days
+                    
+                    # Sort by days until next step
+                    reminder_apps = reminder_apps.sort_values('days_until')
+                    
+                    # Display upcoming reminders
+                    st.write("#### Upcoming Steps")
+                    
+                    # Display overdue reminders
+                    overdue = reminder_apps[reminder_apps['days_until'] < 0]
+                    if not overdue.empty:
+                        st.error("#### Overdue Steps")
+                        for _, app in overdue.iterrows():
+                            st.markdown(f"""
+                            **{app['company']} - {app['job_title']}**  
+                            **Step:** {app['next_steps']}  
+                            **Due:** {app['next_step_date'].strftime('%Y-%m-%d')} (**{abs(app['days_until'])} days overdue**)
+                            """)
+                            
+                            # Add button to mark as completed or update
+                            col1, col2 = st.columns([1, 3])
+                            with col1:
+                                if st.button(f"Complete {app['company']}", key=f"complete_{app['company']}_{app['job_title']}"):
+                                    # Logic to mark as completed
+                                    st.success("This would mark the step as completed")
+                            with col2:
+                                if st.button(f"Update {app['company']}", key=f"update_{app['company']}_{app['job_title']}"):
+                                    # Set up edit mode for this application
+                                    st.session_state.edit_application = {
+                                        'company': app['company'],
+                                        'job_title': app['job_title'],
+                                        'mode': 'update'
+                                    }
+                                    # Switch to edit tab
+                                    st.rerun()
+                    
+                    # Display upcoming reminders (due in the next 7 days)
+                    upcoming = reminder_apps[(reminder_apps['days_until'] >= 0) & (reminder_apps['days_until'] <= 7)]
+                    if not upcoming.empty:
+                        st.warning("#### Due This Week")
+                        for _, app in upcoming.iterrows():
+                            st.markdown(f"""
+                            **{app['company']} - {app['job_title']}**  
+                            **Step:** {app['next_steps']}  
+                            **Due:** {app['next_step_date'].strftime('%Y-%m-%d')} (**{app['days_until']} days from now**)
+                            """)
+                    
+                    # Display future reminders
+                    future = reminder_apps[reminder_apps['days_until'] > 7]
+                    if not future.empty:
+                        st.info("#### Future Steps")
+                        for _, app in future.iterrows():
+                            st.markdown(f"""
+                            **{app['company']} - {app['job_title']}**  
+                            **Step:** {app['next_steps']}  
+                            **Due:** {app['next_step_date'].strftime('%Y-%m-%d')} (**{app['days_until']} days from now**)
+                            """)
+                    
+                    # Option to set up notification reminders
+                    st.write("#### Notification Settings")
+                    
+                    # Toggle for email notifications
+                    email_notify = st.toggle(
+                        "Enable Email Notifications",
+                        value=False,
+                        help="Send email reminders for upcoming steps"
+                    )
+                    
+                    if email_notify:
+                        notify_email = st.text_input(
+                            "Email Address for Notifications",
+                            help="We'll send reminders to this email address"
+                        )
+                        
+                        notify_days = st.number_input(
+                            "Days Before Deadline",
+                            min_value=1,
+                            max_value=7,
+                            value=2,
+                            help="How many days before a deadline to send a reminder"
+                        )
+                        
+                        if st.button("Save Notification Settings"):
+                            st.success("Notification settings saved successfully!")
+                            st.info("Note: Email functionality would be implemented in a real application")
+                
+                else:
+                    st.info("No upcoming steps or reminders found.")
+                    st.write("Add next steps to your applications to see reminders here.")
+            else:
+                st.info("No reminders available. Add applications with next steps to see reminders.")
+            
+            # Manual reminder creation
+            st.write("#### Create New Reminder")
+            
+            # Form for adding a new reminder
+            with st.form("new_reminder_form"):
+                # Job selection (if we have applications)
+                if not st.session_state.applications.empty:
+                    reminder_app = st.selectbox(
+                        "Application",
+                        options=st.session_state.applications['company'] + ' - ' + st.session_state.applications['job_title'],
+                        help="Select the application this reminder is for"
+                    )
+                else:
+                    reminder_app = st.text_input(
+                        "Application",
+                        help="Enter the application name for this reminder"
+                    )
+                
+                reminder_desc = st.text_input(
+                    "Reminder Description",
+                    help="What do you need to remember to do"
+                )
+                
+                reminder_date = st.date_input(
+                    "Reminder Date",
+                    value=datetime.datetime.now().date() + datetime.timedelta(days=7),
+                    help="When to be reminded"
+                )
+                
+                reminder_priority = st.selectbox(
+                    "Priority",
+                    options=["High", "Medium", "Low"],
+                    help="How important is this reminder"
+                )
+                
+                # Submit button
+                reminder_submit = st.form_submit_button("Add Reminder")
+                
+                if reminder_submit:
+                    if reminder_app and reminder_desc:
+                        st.success(f"Reminder added for {reminder_date.strftime('%Y-%m-%d')}")
+                        st.info("Note: In a real application, this would add the reminder to the database")
+                    else:
+                        st.error("Please fill in all required fields")
+    
     with tabs[14]:  # Job Alerts Tab
         st.subheader("Personalized Job Alerts")
         
