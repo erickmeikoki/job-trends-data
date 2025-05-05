@@ -1896,24 +1896,53 @@ else:
             st.write("### Total Compensation Analysis")
             
             # Sample data for total compensation (in a real app, this would be from the database)
-            comp_data = pd.DataFrame({
-                'company': display_data['company'].unique()[:15],
-                'job_level': ['Junior', 'Mid-level', 'Senior', 'Staff', 'Principal',
-                             'Junior', 'Mid-level', 'Senior', 'Junior', 'Mid-level',
-                             'Senior', 'Staff', 'Mid-level', 'Senior', 'Principal'],
-                'base_salary': [85000, 120000, 160000, 185000, 210000,
-                               90000, 125000, 165000, 80000, 115000,
-                               155000, 180000, 130000, 170000, 205000],
-                'bonus': [5000, 15000, 30000, 40000, 60000,
-                         8000, 20000, 35000, 4000, 12000,
-                         25000, 35000, 18000, 30000, 50000],
-                'stock': [0, 20000, 50000, 90000, 150000,
-                         10000, 30000, 60000, 0, 15000,
-                         40000, 80000, 25000, 55000, 130000],
-                'benefits': [15000, 20000, 25000, 30000, 35000,
-                            15000, 20000, 25000, 15000, 20000,
-                            25000, 30000, 20000, 25000, 35000]
-            })
+            try:
+                # Get company names from display data, ensure we have exactly 15
+                companies = display_data['company'].unique()
+                company_list = companies[:15] if len(companies) >= 15 else list(companies) + ["Company " + str(i) for i in range(len(companies), 15)]
+                
+                comp_data = pd.DataFrame({
+                    'company': company_list,
+                    'job_level': ['Junior', 'Mid-level', 'Senior', 'Staff', 'Principal',
+                                'Junior', 'Mid-level', 'Senior', 'Junior', 'Mid-level',
+                                'Senior', 'Staff', 'Mid-level', 'Senior', 'Principal'],
+                    'base_salary': [85000, 120000, 160000, 185000, 210000,
+                                90000, 125000, 165000, 80000, 115000,
+                                155000, 180000, 130000, 170000, 205000],
+                    'bonus': [5000, 15000, 30000, 40000, 60000,
+                            8000, 20000, 35000, 4000, 12000,
+                            25000, 35000, 18000, 30000, 50000],
+                    'stock': [0, 20000, 50000, 90000, 150000,
+                            10000, 30000, 60000, 0, 15000,
+                            40000, 80000, 25000, 55000, 130000],
+                    'benefits': [15000, 20000, 25000, 30000, 35000,
+                                15000, 20000, 25000, 15000, 20000,
+                                25000, 30000, 20000, 25000, 35000]
+                })
+            except ValueError as e:
+                # Fallback to a fixed dataset if there's any length mismatch
+                st.warning("Error creating compensation data. Using default dataset.")
+                
+                company_names = ["Company " + str(i) for i in range(1, 16)]
+                
+                comp_data = pd.DataFrame({
+                    'company': company_names,
+                    'job_level': ['Junior', 'Mid-level', 'Senior', 'Staff', 'Principal',
+                                'Junior', 'Mid-level', 'Senior', 'Junior', 'Mid-level',
+                                'Senior', 'Staff', 'Mid-level', 'Senior', 'Principal'],
+                    'base_salary': [85000, 120000, 160000, 185000, 210000,
+                                90000, 125000, 165000, 80000, 115000,
+                                155000, 180000, 130000, 170000, 205000],
+                    'bonus': [5000, 15000, 30000, 40000, 60000,
+                            8000, 20000, 35000, 4000, 12000,
+                            25000, 35000, 18000, 30000, 50000],
+                    'stock': [0, 20000, 50000, 90000, 150000,
+                            10000, 30000, 60000, 0, 15000,
+                            40000, 80000, 25000, 55000, 130000],
+                    'benefits': [15000, 20000, 25000, 30000, 35000,
+                                15000, 20000, 25000, 15000, 20000,
+                                25000, 30000, 20000, 25000, 35000]
+                })
             
             # Calculate total compensation
             comp_data['total_comp'] = comp_data['base_salary'] + comp_data['bonus'] + comp_data['stock'] + comp_data['benefits']
@@ -2220,50 +2249,66 @@ else:
             # Show table of experience-based progression data
             st.write("### Detailed Progression Data by Company")
             
-            # Format the progression table
-            prog_table = job_prog_data.pivot(index='company', columns='years_experience', values='salary')
-            prog_table.columns = [f"{col} Years" for col in prog_table.columns]
-            
-            # Calculate growth percentages
-            for company in prog_table.index:
-                # Find the column representing 0 years (could be '0.0 Years' or '0 Years')
-                zero_year_col = None
-                for col in prog_table.columns:
-                    if '0' in str(col) and 'Years' in str(col) and 'Growth' not in str(col):
-                        zero_year_col = col
-                        break
+            # Create a safe version of the progression table
+            try:
+                # Format the progression table
+                prog_table = job_prog_data.pivot(index='company', columns='years_experience', values='salary')
+                prog_table.columns = [f"{col} Years" for col in prog_table.columns]
                 
-                if zero_year_col is not None:
-                    baseline = prog_table.loc[company, zero_year_col]
+                # Calculate growth percentages
+                for company in prog_table.index:
+                    # Find the column representing 0 years (could be '0.0 Years' or '0 Years')
+                    zero_year_col = None
                     for col in prog_table.columns:
-                        if 'Growth' not in str(col) and col != zero_year_col:
-                            current = prog_table.loc[company, col]
-                            growth_pct = (current / baseline - 1) * 100
-                            prog_table.loc[company, f"{col} Growth"] = f"{growth_pct:.1f}%"
-            
-            # Get actual column names from the DataFrame
-            available_years = [col for col in prog_table.columns if "Growth" not in str(col)]
-            
-            # Reorder columns based on actual values
-            new_cols = []
-            for year_col in available_years:
-                new_cols.append(year_col)
-                growth_col = f"{year_col} Growth"
-                # Check if growth column exists before adding it
-                try:
+                        if '0' in str(col) and 'Years' in str(col) and 'Growth' not in str(col):
+                            zero_year_col = col
+                            break
+                    
+                    if zero_year_col is not None:
+                        baseline = prog_table.loc[company, zero_year_col]
+                        for col in prog_table.columns:
+                            if 'Growth' not in str(col) and col != zero_year_col:
+                                current = prog_table.loc[company, col]
+                                growth_pct = (current / baseline - 1) * 100
+                                prog_table.loc[company, f"{col} Growth"] = f"{growth_pct:.1f}%"
+                
+                # Get actual column names from the DataFrame
+                available_years = [col for col in prog_table.columns if "Growth" not in str(col)]
+                
+                # Reorder columns based on actual values
+                new_cols = []
+                for year_col in available_years:
+                    new_cols.append(year_col)
+                    growth_col = f"{year_col} Growth"
+                    # Only add columns that actually exist
                     if growth_col in prog_table.columns:
                         new_cols.append(growth_col)
-                except:
-                    # Skip if any error occurs with column check
-                    pass
+                
+                # Select and display the table - only select columns that exist
+                safe_cols = [col for col in new_cols if col in prog_table.columns]
+                display_prog = prog_table[safe_cols]
             
-            # Select and display the table
-            display_prog = prog_table[new_cols]
+            except Exception as e:
+                st.error(f"Error processing salary progression data: {e}")
+                # Create a simple fallback table
+                display_prog = pd.DataFrame(
+                    {
+                        "Company": ["Example Corp", "Tech Inc"],
+                        "0 Years": ["$70,000", "$75,000"],
+                        "5 Years": ["$120,000", "$130,000"],
+                        "5 Years Growth": ["71.4%", "73.3%"]
+                    }
+                ).set_index("Company")
             
             # Format salary columns
-            for col in display_prog.columns:
-                if "Growth" not in str(col):
-                    display_prog[col] = display_prog[col].apply(lambda x: f"${x:,.0f}")
+            try:
+                for col in display_prog.columns:
+                    if "Growth" not in str(col):
+                        # Check if this is already a string (from fallback data)
+                        if not isinstance(display_prog[col].iloc[0], str):
+                            display_prog[col] = display_prog[col].apply(lambda x: f"${x:,.0f}")
+            except Exception as e:
+                st.warning(f"Error formatting salary data: {e}")
             
             st.dataframe(display_prog, use_container_width=True)
     
