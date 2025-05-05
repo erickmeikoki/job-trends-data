@@ -2226,25 +2226,43 @@ else:
             
             # Calculate growth percentages
             for company in prog_table.index:
-                baseline = prog_table.loc[company, '0 Years']
-                for col in prog_table.columns[1:]:
-                    current = prog_table.loc[company, col]
-                    growth_pct = (current / baseline - 1) * 100
-                    prog_table.loc[company, f"{col} Growth"] = f"{growth_pct:.1f}%"
+                # Find the column representing 0 years (could be '0.0 Years' or '0 Years')
+                zero_year_col = None
+                for col in prog_table.columns:
+                    if '0' in str(col) and 'Years' in str(col) and 'Growth' not in str(col):
+                        zero_year_col = col
+                        break
+                
+                if zero_year_col is not None:
+                    baseline = prog_table.loc[company, zero_year_col]
+                    for col in prog_table.columns:
+                        if 'Growth' not in str(col) and col != zero_year_col:
+                            current = prog_table.loc[company, col]
+                            growth_pct = (current / baseline - 1) * 100
+                            prog_table.loc[company, f"{col} Growth"] = f"{growth_pct:.1f}%"
             
-            # Reorder columns to alternate salary and growth
+            # Get actual column names from the DataFrame
+            available_years = [col for col in prog_table.columns if "Growth" not in str(col)]
+            
+            # Reorder columns based on actual values
             new_cols = []
-            for year in [0, 2, 5, 8, 12]:
-                new_cols.append(f"{year} Years")
-                if year > 0:
-                    new_cols.append(f"{year} Years Growth")
+            for year_col in available_years:
+                new_cols.append(year_col)
+                growth_col = f"{year_col} Growth"
+                # Check if growth column exists before adding it
+                try:
+                    if growth_col in prog_table.columns:
+                        new_cols.append(growth_col)
+                except:
+                    # Skip if any error occurs with column check
+                    pass
             
             # Select and display the table
             display_prog = prog_table[new_cols]
             
             # Format salary columns
             for col in display_prog.columns:
-                if "Growth" not in col:
+                if "Growth" not in str(col):
                     display_prog[col] = display_prog[col].apply(lambda x: f"${x:,.0f}")
             
             st.dataframe(display_prog, use_container_width=True)
@@ -2371,7 +2389,7 @@ else:
                     margin=dict(l=20, r=20, t=20, b=100)
                 )
                 
-                st.plotly_chart(path_fig, use_container_width=True)
+                st.plotly_chart(path_fig, use_container_width=True, key="career_path_viz")
                 
                 # Show typical time frames
                 time_frames = [
