@@ -1,0 +1,51 @@
+date,job_title,job_type,company,location,salary
+2025-02-20,Technical Writer,Other,Google,"Austin, TX","$132,000"
+2025-03-18,Software Tester,QA/Testing,Google,Hybrid - SF,"$128,000"
+2024-11-09,ETL Developer,Data Engineering,Slack,"Los Angeles, CA",
+2024-12-23,Full Stack Developer,Full-Stack,Stripe,"Austin, TX","$105,000"
+2025-01-11,ML Engineer,Machine Learning,Google,"London, UK","$132,000"
+2024-11-29,React Developer,Frontend,Nvidia,"Seattle, WA","$175,000"
+2025-02-26,Product Manager,Other,PayPal,"Chicago, IL","$146,000"
+2024-11-13,ML Ops Engineer,Machine Learning,LinkedIn,"Boston, MA",
+2025-04-03,Test Automation Engineer,QA/Testing,Facebook,"Austin, TX",
+2025-02-03,React Native Developer,Mobile,Oracle,"Los Angeles, CA","$177,000"
+2024-12-12,Test Automation Engineer,QA/Testing,Facebook,"Los Angeles, CA",
+2024-12-14,Site Reliability Engineer,DevOps,Netflix,"Portland, OR","$194,000"
+2025-02-22,DevOps Engineer,DevOps,Twilio,"New York, NY","$147,000"
+2025-03-04,Frontend Developer,Frontend,Amazon,Singapore,"$99,000"
+2025-01-15,Product Manager,Other,Spotify,Hybrid - SF,"$185,000"
+2025-04-07,Full Stack Developer,Full-Stack,Adobe,"Portland, OR","$100,000"
+2024-12-02,ML Ops Engineer,Machine Learning,Salesforce,"Berlin, Germany",
+2025-03-04,Blockchain Developer,Other,Slack,"Seattle, WA","$148,000"
+2025-04-23,Backend Engineer,Backend,Microsoft,"Atlanta, GA","$150,000"
+2024-12-13,QA Engineer,QA/Testing,Airbnb,"Seattle, WA","$159,000"
+2025-01-05,Security Engineer,Other,Oracle,Hybrid - SF,"$198,000"
+2024-11-15,ETL Developer,Data Engineering,LinkedIn,Singapore,
+2024-11-16,Backend Engineer,Backend,Intel,"San Francisco, CA","$115,000"
+2024-12-05,AI Researcher,Machine Learning,Netflix,"Austin, TX","$92,000"
+2025-04-27,Site Reliability Engineer,DevOps,LinkedIn,Remote,"$155,000"
+2025-01-15,Backend Engineer,Backend,Uber,"Atlanta, GA","$85,000"
+2025-01-31,Java Developer,Backend,Uber,"Boston, MA","$181,000"
+2024-11-20,Web Application Developer,Full-Stack,AMD,Remote,"$98,000"
+2025-04-01,Site Reliability Engineer,DevOps,Apple,"San Francisco, CA",
+2024-11-29,Quality Assurance Analyst,QA/Testing,Square,"Toronto, Canada",
+2025-01-01,Node.js Developer,Backend,Salesforce,"Portland, OR","$154,000"
+2025-04-23,Cloud Engineer,DevOps,Slack,"Austin, TX",
+2025-04-11,Technical Writer,Other,Twitter,"Seattle, WA","$88,000"
+2025-03-26,Backend Engineer,Backend,IBM,"Seattle, WA","$191,000"
+2024-12-22,Data Scientist,Machine Learning,Spotify,"Denver, CO","$189,000"
+2025-02-26,Data Architect,Data Engineering,Amazon,"San Francisco, CA","$111,000"
+2025-01-16,API Engineer,Backend,Twilio,Hybrid - SF,
+2025-03-28,UI Engineer,Frontend,AMD,Hybrid - Seattle,
+2025-02-28,Security Engineer,Other,Netflix,"Los Angeles, CA","$132,000"
+2025-03-14,Mobile Engineer,Mobile,Microsoft,Singapore,"$88,000"
+2025-03-17,iOS Developer,Mobile,Facebook,"Seattle, WA","$117,000"
+2024-12-26,QA Engineer,QA/Testing,Uber,"Portland, OR","$92,000"
+2025-01-26,Blockchain Developer,Other,Microsoft,"London, UK","$188,000"
+2025-03-27,Test Automation Engineer,QA/Testing,Zoom,Singapore,"$188,000"
+2024-12-14,Security Engineer,Other,AMD,Singapore,
+2025-03-11,Full Stack Engineer,Full-Stack,Oracle,"Los Angeles, CA","$87,000"
+2025-02-17,ETL Developer,Data Engineering,Facebook,"Los Angeles, CA",
+2024-12-20,Full Stack Developer,Full-Stack,Microsoft,"Portland, OR","$85,000"
+2024-12-24,Product Manager,Other,Oracle,"Austin, TX","$97,000"
+2025-02-17,Mobile Engineer,Mobile,IBM,"Boston, MA",
