@@ -1,101 +1,101 @@
 date,job_title,job_type,company,location,salary
-2025-04-21,Web Developer,Frontend,NBC Universal,"Miami, FL","$120,000"
-2025-04-15,SOC Analyst,Cybersecurity,Canva,"Melbourne, Australia","$140,000"
-2024-11-22,Infrastructure Engineer,DevOps,Disney Streaming,Remote - US Only,
-2024-12-01,Mobile App Developer,Mobile,CVS Health Tech,"Seoul, South Korea","$101,000"
-2025-03-29,XR Designer,AR/VR,Capital One,"Melbourne, Australia","$124,000"
-2025-02-01,ML Infrastructure Engineer,Machine Learning,Cognizant,"Berlin, Germany","$113,000"
-2024-12-13,Full Stack Engineer,Full-Stack,Vercel,Hybrid - SF,"$181,000"
-2024-12-05,WebXR Developer,AR/VR,Figma,"Amsterdam, Netherlands","$182,000"
-2025-04-28,PHP Developer,Backend,Infosys,"Bangalore, India",
-2025-03-10,Microcontroller Programmer,Embedded,Airtable,Remote,"$97,000"
-2024-12-10,Infrastructure Engineer,DevOps,EPAM,"Seattle, WA",
-2025-04-16,WebXR Developer,AR/VR,NASA,"San Francisco, CA",
-2025-01-24,Developer Relations,Other,Retool,"Salt Lake City, UT",
-2024-12-17,DevOps Engineer,DevOps,Twitter,"New York, NY","$133,000"
-2025-01-05,Data Pipeline Engineer,Data Engineering,Capgemini,"Dublin, Ireland",
-2024-12-17,Cloud Engineer,DevOps,Deloitte Digital,"New York, NY","$129,000"
-2024-12-27,FPGA Developer,Embedded,Elastic,"Phoenix, AZ",
-2025-01-22,Embedded Linux Engineer,Embedded,Coursera,Hybrid - Seattle,"$157,000"
-2024-11-28,VR Developer,AR/VR,Spotify,"Hyderabad, India","$190,000"
-2025-03-26,FPGA Developer,Embedded,Confluent,"Atlanta, GA","$80,000"
-2025-04-08,Frontend Developer,Frontend,Confluent,"Chicago, IL","$160,000"
-2024-12-29,Kubernetes Engineer,DevOps,Deloitte Digital,"Paris, France","$181,000"
-2025-02-02,Embedded Linux Engineer,Embedded,Code for America,"Miami, FL","$128,000"
-2025-01-31,SDET,QA/Testing,Zapier,"Austin, TX",
-2024-11-28,AI Engineer,Machine Learning,USDS,Hong Kong,"$164,000"
-2024-12-20,Site Reliability Engineer,DevOps,Retool,"New York, NY",
-2025-04-22,AI Researcher,Machine Learning,Elastic,Remote - US Only,"$175,000"
-2025-01-02,iOS Developer,Mobile,Khan Academy,"Atlanta, GA",
-2025-01-01,Cryptographer,Cybersecurity,Apple,"London, UK","$148,000"
-2025-02-18,Cross-Platform Developer,Mobile,Databricks,Hybrid - SF,"$113,000"
-2025-01-04,XR Designer,AR/VR,Wipro,"Dublin, Ireland","$140,000"
-2025-01-09,Software Engineer,Full-Stack,Comcast,"Minneapolis, MN","$123,000"
-2024-12-02,MEAN Stack Developer,Full-Stack,MongoDB,"Berlin, Germany","$198,000"
-2025-03-07,Flutter Developer,Mobile,Calendly,"San Francisco, CA","$84,000"
-2025-02-28,React Native Developer,Mobile,Home Depot Tech,"Minneapolis, MN","$172,000"
-2025-01-05,Edge Computing Specialist,Other,Khan Academy,"Paris, France","$161,000"
-2025-01-15,XR Designer,AR/VR,Infosys,Hong Kong,"$188,000"
-2025-03-14,Penetration Tester,Cybersecurity,Retool,"Seoul, South Korea",
-2025-02-16,Azure Engineer,DevOps,Figma,"Amsterdam, Netherlands","$158,000"
-2025-03-06,Go Developer,Backend,Canva,"Hyderabad, India","$176,000"
-2025-03-11,PHP Developer,Backend,Code for America,"Boston, MA","$124,000"
-2025-01-11,Systems Analyst,Other,Home Depot Tech,Hong Kong,
-2025-03-05,Bioinformatics Developer,Other,Spotify,"London, UK","$93,000"
-2024-11-08,ML Ops Engineer,Machine Learning,GitLab,"Phoenix, AZ","$160,000"
-2024-12-28,Developer Relations,Other,Disney Streaming,"Chicago, IL",
-2025-01-09,UI Engineer,Frontend,Loom,"Detroit, MI",
-2025-05-02,Edge Computing Specialist,Other,HashiCorp,"Manchester, UK","$199,000"
-2025-02-20,Robotics Engineer,Other,Accenture,Hybrid - SF,"$168,000"
-2025-05-02,Game Developer,Game Development,Walmart Labs,"Detroit, MI",
-2024-11-22,Embedded C/C++ Developer,Embedded,Pitch,Hybrid - Seattle,"$169,000"
-2024-12-14,Spark Engineer,Data Engineering,Spotify,"Austin, TX","$102,000"
-2024-11-21,Developer Advocate,Other,Twitter,"Raleigh, NC","$162,000"
-2025-02-12,Full Stack Developer,Full-Stack,Apple,"Seoul, South Korea","$192,000"
-2024-12-14,GCP Engineer,DevOps,Uber,"Manchester, UK","$124,000"
-2025-01-01,GCP Engineer,DevOps,Tata Consultancy,"Detroit, MI","$104,000"
-2025-04-08,Product Manager,Other,Airtable,"London, UK","$136,000"
-2025-01-17,Deep Learning Engineer,Machine Learning,NBC Universal,"Miami, FL","$123,000"
-2025-01-13,Test Automation Engineer,QA/Testing,Cloudflare,Remote - US Only,
-2025-01-01,Security Engineer,Cybersecurity,Datadog,"Munich, Germany",
-2025-04-15,Ruby Developer,Backend,Microsoft,Hybrid - Chicago,"$105,000"
-2025-01-22,Application Security Engineer,Cybersecurity,Disney Streaming,"Boston, MA","$143,000"
-2025-01-22,QA Lead,QA/Testing,Accenture,"Denver, CO","$158,000"
-2025-02-09,FPGA Developer,Embedded,Loom,"Chicago, IL","$131,000"
-2025-01-09,iOS Developer,Mobile,USDS,"Vancouver, Canada","$108,000"
-2024-11-28,SDET,QA/Testing,18F,"Portland, OR",
-2025-04-12,AI Researcher,Machine Learning,MongoDB,"Seattle, WA","$125,000"
-2024-11-13,Platform Engineer,DevOps,Microsoft,Hybrid - Austin,
-2025-01-30,Django Developer,Full-Stack,Airtable,"Dallas, TX","$178,000"
-2025-04-05,Unity XR Developer,AR/VR,Capgemini,Hybrid - NYC,"$183,000"
-2025-02-24,Mobile App Developer,Mobile,Notion,Remote - US Only,"$190,000"
-2024-12-04,ML Engineer,Machine Learning,Vercel,"Detroit, MI","$183,000"
-2025-02-12,Game Programmer,Game Development,Netflix,Remote,
-2025-04-17,Full Stack Developer,Full-Stack,Comcast,Remote - US Only,"$136,000"
-2024-11-06,Blockchain Developer,Other,NASA,Remote - US Only,
-2025-01-21,Accessibility Tester,QA/Testing,Vercel,"Minneapolis, MN","$192,000"
-2025-04-12,AR Developer,AR/VR,Mozilla,Singapore,"$178,000"
-2025-04-20,Big Data Engineer,Data Engineering,Digital Ocean,Hybrid - SF,"$142,000"
-2025-03-17,Big Data Engineer,Data Engineering,Twilio,"Denver, CO","$190,000"
-2025-02-14,Infrastructure Engineer,DevOps,Spotify,"Salt Lake City, UT",
-2024-12-30,Python Developer,Backend,Wipro,Hybrid - Chicago,"$143,000"
-2025-03-26,QA Lead,QA/Testing,Uber,"Raleigh, NC","$193,000"
-2025-02-26,Software Tester,QA/Testing,JPMorgan Chase,"Munich, Germany","$184,000"
-2024-11-20,Developer Advocate,Other,Disney Streaming,"Atlanta, GA","$89,000"
-2025-04-11,PHP Developer,Backend,Capgemini,"Montreal, Canada","$115,000"
-2025-02-12,Game Engine Developer,Game Development,Airbnb,"London, UK","$106,000"
-2024-12-24,Application Security Engineer,Cybersecurity,Netflix,"New York, NY","$146,000"
-2025-04-04,Quantum Computing Engineer,Other,EPAM,Hybrid - NYC,"$166,000"
-2025-01-31,Data Architect,Data Engineering,Accenture,Hybrid - Austin,
-2024-12-02,GCP Engineer,DevOps,Notion,Hybrid - Chicago,"$93,000"
-2024-11-09,SDET,QA/Testing,Netflix,"Munich, Germany","$190,000"
-2025-02-26,Developer Advocate,Other,Capital One,"Denver, CO","$123,000"
-2025-04-22,.NET Developer,Backend,Target Tech,"Amsterdam, Netherlands",
-2025-05-03,Ethical Hacker,Cybersecurity,Coursera,"London, UK","$91,000"
-2025-03-16,Unity XR Developer,AR/VR,Capgemini,"San Francisco, CA","$174,000"
-2025-02-16,Mobile App Developer,Mobile,Datadog,Hybrid - Austin,
-2025-04-23,Unity Developer,Game Development,Uber,Hong Kong,
-2024-12-04,Computer Vision Engineer,Machine Learning,Notion,"Melbourne, Australia",
-2025-03-19,Unity XR Developer,AR/VR,Apple,"Miami, FL","$196,000"
-2025-03-19,Angular Developer,Frontend,Wikimedia,"Salt Lake City, UT","$194,000"
-2025-03-07,Metaverse Engineer,AR/VR,Airbnb,Hybrid - Chicago,"$170,000"
+2024-12-28,Kubernetes Engineer,DevOps,Capgemini,"Amsterdam, Netherlands",
+2025-04-06,Developer Relations,Other,Twilio,"Berlin, Germany",
+2025-01-24,Backend Engineer,Backend,Calendly,Hong Kong,
+2024-11-30,Game Programmer,Game Development,Spotify,"Seoul, South Korea","$122,000"
+2025-03-05,UI Engineer,Frontend,Vercel,"Chicago, IL","$92,000"
+2025-03-16,ML Ops Engineer,Machine Learning,GitLab,Hybrid - Austin,"$97,000"
+2024-11-21,Game Engine Developer,Game Development,Airbnb,"Amsterdam, Netherlands","$81,000"
+2025-02-06,SOC Analyst,Cybersecurity,Cognizant,"New York, NY","$142,000"
+2024-12-22,Software Engineer,Full-Stack,Elastic,"Miami, FL","$83,000"
+2025-02-15,Technical Support Engineer,Other,Atlassian,"Seattle, WA","$181,000"
+2025-03-17,SOC Analyst,Cybersecurity,EPAM,"Melbourne, Australia","$168,000"
+2025-04-02,Test Automation Engineer,QA/Testing,Bank of America,Hong Kong,
+2025-03-13,Mobile Engineer,Mobile,Datadog,"Hyderabad, India",
+2025-03-01,GCP Engineer,DevOps,Amazon,"Dallas, TX","$110,000"
+2025-02-17,Test Engineer,QA/Testing,Datadog,"Melbourne, Australia","$170,000"
+2024-11-27,Mixed Reality Engineer,AR/VR,Confluent,Hybrid - Seattle,"$187,000"
+2024-12-13,Game Developer,Game Development,Slalom,Remote - Worldwide,
+2025-05-03,Accessibility Tester,QA/Testing,MongoDB,"Tokyo, Japan","$145,000"
+2025-04-19,MERN Stack Developer,Full-Stack,Home Depot Tech,"Salt Lake City, UT","$178,000"
+2025-04-17,Platform Engineer,DevOps,Figma,"Detroit, MI",
+2024-12-13,Software Tester,QA/Testing,Wikimedia,Hong Kong,"$88,000"
+2025-04-09,SDET,QA/Testing,Deloitte Digital,"Boston, MA",
+2025-05-01,Firmware Developer,Embedded,Wipro,"Hyderabad, India",
+2025-04-27,Cross-Platform Developer,Mobile,Figma,"Vancouver, Canada","$121,000"
+2025-04-29,Release Engineer,DevOps,Figma,"Dallas, TX",
+2025-01-27,Database Administrator,Data Engineering,Figma,"Melbourne, Australia",
+2025-01-03,Swift Developer,Mobile,USDS,"Atlanta, GA","$97,000"
+2025-04-01,Research Scientist,Machine Learning,Khan Academy,Hybrid - Seattle,"$133,000"
+2025-01-14,Game AI Programmer,Game Development,HashiCorp,"Bangalore, India",
+2025-04-21,Game Engine Developer,Game Development,Meta,"Nashville, TN",
+2025-03-20,Big Data Engineer,Data Engineering,Zapier,"Salt Lake City, UT","$179,000"
+2024-11-09,Developer Relations,Other,Thoughtworks,"Hyderabad, India","$156,000"
+2025-03-23,RTOS Developer,Embedded,Thoughtworks,"Dallas, TX",
+2025-04-08,Hardware Engineer,Embedded,HashiCorp,"Nashville, TN",
+2024-11-15,Big Data Engineer,Data Engineering,CVS Health Tech,"Denver, CO",
+2025-03-30,.NET Developer,Backend,Bank of America,"Chicago, IL","$158,000"
+2024-12-22,Unreal Engine Developer,Game Development,Twitter,"Austin, TX","$124,000"
+2025-01-17,Systems Analyst,Other,Databricks,"Minneapolis, MN","$105,000"
+2025-01-14,Deep Learning Engineer,Machine Learning,Coursera,Hong Kong,
+2025-03-20,Laravel Developer,Full-Stack,Tata Consultancy,Hybrid - NYC,"$200,000"
+2025-04-17,Mixed Reality Engineer,AR/VR,Figma,"Munich, Germany","$174,000"
+2025-03-19,Big Data Engineer,Data Engineering,Zapier,Remote,"$196,000"
+2025-04-01,Blockchain Developer,Other,NBC Universal,"Los Angeles, CA","$146,000"
+2025-01-20,Software Engineer,Full-Stack,Vercel,"Minneapolis, MN","$167,000"
+2025-04-06,Cloud Engineer,DevOps,Retool,"Paris, France","$147,000"
+2024-12-22,React Developer,Frontend,Canva,Hybrid - SF,"$99,000"
+2024-11-23,FPGA Developer,Embedded,Khan Academy,"London, UK","$89,000"
+2024-12-22,RTOS Developer,Embedded,Code for America,"Denver, CO","$141,000"
+2024-12-11,.NET Developer,Backend,Atlassian,Remote,
+2024-11-16,Frontend Architect,Frontend,Infosys,"Dallas, TX","$122,000"
+2025-04-25,Ruby on Rails Developer,Full-Stack,Code for America,"Seoul, South Korea","$162,000"
+2025-04-20,Test Automation Engineer,QA/Testing,Deloitte Digital,"Hyderabad, India",
+2025-04-24,Ruby Developer,Backend,Comcast,"Miami, FL","$181,000"
+2025-03-15,ETL Developer,Data Engineering,Zapier,"Raleigh, NC","$160,000"
+2024-12-09,Angular Developer,Frontend,Wipro,"Montreal, Canada","$91,000"
+2025-03-04,Web Developer,Frontend,Mozilla,"Nashville, TN","$154,000"
+2024-12-09,Physics Programmer,Game Development,Disney Streaming,Singapore,
+2025-01-22,.NET Developer,Backend,Airtable,"Dublin, Ireland",
+2025-02-10,Test Engineer,QA/Testing,18F,"Bangalore, India","$155,000"
+2025-03-08,Test Automation Engineer,QA/Testing,Cloudflare,"Dallas, TX",
+2025-01-28,UI/UX Developer,Frontend,Vercel,"Sydney, Australia",
+2025-03-29,Game Engine Developer,Game Development,Wipro,"Chicago, IL",
+2025-04-02,Backend Engineer,Backend,Zapier,"Detroit, MI","$162,000"
+2024-12-30,JavaScript Developer,Frontend,Target Tech,"Manchester, UK",
+2025-01-21,Full Stack Developer,Full-Stack,Zapier,"Toronto, Canada","$129,000"
+2025-01-31,Mixed Reality Engineer,AR/VR,Tata Consultancy,Remote,"$134,000"
+2024-12-10,Software Engineer,Full-Stack,Comcast,"Dublin, Ireland","$162,000"
+2025-02-13,Graphics Programmer,Game Development,Thoughtworks,"Paris, France",
+2025-02-04,XR Designer,AR/VR,Capgemini,"Munich, Germany","$189,000"
+2025-02-05,Graphics Programmer,Game Development,Figma,Remote - Worldwide,"$144,000"
+2025-05-05,Kotlin Developer,Mobile,Capgemini,"Atlanta, GA","$183,000"
+2025-03-22,Security Architect,Cybersecurity,Accenture,"Berlin, Germany",
+2025-05-04,NLP Engineer,Machine Learning,Mozilla,Hybrid - Chicago,"$91,000"
+2024-12-08,Django Developer,Full-Stack,Digital Ocean,"Dublin, Ireland",
+2025-04-30,Physics Programmer,Game Development,Thoughtworks,"Portland, OR",
+2025-01-10,Azure Engineer,DevOps,CVS Health Tech,"London, UK",
+2025-04-02,IoT Developer,Embedded,Capital One,"Seattle, WA","$90,000"
+2024-11-16,Python Developer,Backend,USDS,"Miami, FL","$175,000"
+2024-11-07,Unity Developer,Game Development,Atlassian,Remote,"$154,000"
+2025-04-15,Infrastructure Engineer,DevOps,Google,"Detroit, MI","$154,000"
+2025-02-26,Kotlin Developer,Mobile,Canva,Remote - US Only,
+2024-11-14,ML Engineer,Machine Learning,Apple,"Seattle, WA","$171,000"
+2025-01-23,MERN Stack Developer,Full-Stack,Figma,"Salt Lake City, UT",
+2025-02-23,Django Developer,Full-Stack,Canva,"Amsterdam, Netherlands","$129,000"
+2025-01-18,Laravel Developer,Full-Stack,Bank of America,"Melbourne, Australia","$139,000"
+2025-01-05,Frontend Architect,Frontend,Coursera,"Los Angeles, CA","$199,000"
+2025-03-26,Research Scientist,Machine Learning,Home Depot Tech,"Phoenix, AZ",
+2024-12-17,XR Designer,AR/VR,Microsoft,"Denver, CO",
+2025-01-04,Full Stack Engineer,Full-Stack,Target Tech,"Dublin, Ireland","$84,000"
+2025-04-07,Cloud Engineer,DevOps,Apple,"Los Angeles, CA","$140,000"
+2024-12-31,Software Tester,QA/Testing,Loom,"London, UK","$131,000"
+2025-02-13,Data Architect,Data Engineering,Zapier,"New York, NY","$160,000"
+2025-02-04,Unity Developer,Game Development,Notion,Remote - US Only,"$199,000"
+2025-03-31,Flutter Developer,Mobile,Target Tech,"London, UK",
+2025-01-02,Vue Developer,Frontend,Databricks,"Munich, Germany",
+2025-02-13,Bioinformatics Developer,Other,Loom,"Dallas, TX",
+2024-12-29,Spatial Computing Engineer,AR/VR,Tata Consultancy,"Portland, OR",
+2025-04-25,Graphics Programmer,Game Development,Pitch,"Atlanta, GA","$148,000"
+2025-03-11,Penetration Tester,Cybersecurity,Canva,"Bangalore, India","$140,000"
+2024-11-24,ML Ops Engineer,Machine Learning,Comcast,"Melbourne, Australia","$154,000"
