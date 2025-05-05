@@ -1489,18 +1489,18 @@ else:
             # Compare interview components
             st.write("### Interview Component Comparison")
             component_fig = plot_interview_components_comparison(st.session_state.interview_data)
-            st.plotly_chart(component_fig, use_container_width=True)
+            st.plotly_chart(component_fig, use_container_width=True, key="interview_component_comparison")
         
         with interview_tabs[1]:  # Interview Trends
             st.write("### Interview Difficulty Trends Over Time")
             
             trend_fig = plot_interview_difficulty_trend(st.session_state.interview_data)
-            st.plotly_chart(trend_fig, use_container_width=True)
+            st.plotly_chart(trend_fig, use_container_width=True, key="interview_trend_fig")
             
             # Success factors analysis
             st.write("### Success Factors in Interviews")
             success_fig = plot_interview_success_factors(st.session_state.interview_data)
-            st.plotly_chart(success_fig, use_container_width=True)
+            st.plotly_chart(success_fig, use_container_width=True, key="interview_success_fig")
             
             # Show insights
             st.write("### Interview Success Insights")
@@ -1782,7 +1782,7 @@ else:
                 ))
                 
                 difficulty_gauge.update_layout(height=250)
-                st.plotly_chart(difficulty_gauge, use_container_width=True)
+                st.plotly_chart(difficulty_gauge, use_container_width=True, key="difficulty_gauge_chart")
                 
                 # Show common interview questions
                 st.write("#### Common Interview Questions")
@@ -1854,7 +1854,7 @@ else:
                     )
                     
                     fig.update_layout(height=500)
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, use_container_width=True, key="salary_distribution_fig")
                     
                     # Show average salaries by job type
                     st.write("### Average Salaries by Job Type")
@@ -1869,7 +1869,7 @@ else:
                     )
                     
                     avg_fig.update_layout(height=400)
-                    st.plotly_chart(avg_fig, use_container_width=True)
+                    st.plotly_chart(avg_fig, use_container_width=True, key="avg_salary_fig")
                     
                     # Show detailed salary statistics
                     st.write("### Detailed Salary Statistics")
@@ -1945,7 +1945,7 @@ else:
                 )
                 
                 fig.update_layout(height=500, barmode='stack')
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, key="comp_breakdown_fig")
                 
                 # Show compensation by level across companies
                 st.write("### Compensation by Level")
@@ -1961,7 +1961,7 @@ else:
                 )
                 
                 level_fig.update_layout(height=500)
-                st.plotly_chart(level_fig, use_container_width=True)
+                st.plotly_chart(level_fig, use_container_width=True, key="comp_by_level_fig")
                 
                 # Show detailed compensation data
                 st.write("### Detailed Compensation Data")
@@ -2028,7 +2028,7 @@ else:
                     height=400
                 )
                 
-                st.plotly_chart(base_fig, use_container_width=True)
+                st.plotly_chart(base_fig, use_container_width=True, key="col_index_chart")
             
             # Job type selection for COL-adjusted analysis
             col_job_type = st.selectbox(
@@ -2090,7 +2090,7 @@ else:
                     barmode='group'
                 )
                 
-                st.plotly_chart(compare_fig, use_container_width=True)
+                st.plotly_chart(compare_fig, use_container_width=True, key="col_compare_fig")
                 
                 # Display the data table with both nominal and adjusted salaries
                 st.write("### Detailed Salary Adjustment Data")
@@ -2176,7 +2176,7 @@ else:
             )
             
             prog_fig.update_layout(height=500)
-            st.plotly_chart(prog_fig, use_container_width=True)
+            st.plotly_chart(prog_fig, use_container_width=True, key="salary_progression_fig")
             
             # Add experience milestones explanation
             st.write("### Experience Level Milestones")
