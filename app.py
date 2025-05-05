@@ -13,7 +13,10 @@ from utils.visualizer import (
     plot_jobs_by_month,
     plot_jobs_by_type,
     plot_jobs_trend,
-    plot_company_distribution
+    plot_company_distribution,
+    plot_geographical_distribution,
+    plot_location_type_distribution,
+    extract_region
 )
 
 # Set page configuration
@@ -255,7 +258,9 @@ else:
         "Monthly Trends", 
         "Job Types", 
         "Time Series Analysis", 
-        "Company Distribution"
+        "Company Distribution",
+        "Geographical Distribution",
+        "Remote vs On-site"
     ])
     
     with tabs[0]:
@@ -277,12 +282,42 @@ else:
         st.subheader("Top Companies Hiring")
         fig4 = plot_company_distribution(display_data)
         st.plotly_chart(fig4, use_container_width=True)
+        
+    with tabs[4]:
+        st.subheader("Geographical Distribution")
+        fig5 = plot_geographical_distribution(display_data)
+        st.plotly_chart(fig5, use_container_width=True)
+        
+        # Add help text explaining regions
+        with st.expander("About Geographical Regions"):
+            st.markdown("""
+            **How regions are determined:**
+            - **US West**: Includes California, Washington, Oregon, Colorado, Arizona, Utah, Nevada, and major cities like San Francisco, Seattle, Los Angeles, Denver, Portland
+            - **US East**: Includes New York, Massachusetts, Georgia, Florida, North Carolina, Virginia, and major cities like NYC, Boston, Atlanta, Miami
+            - **US Central**: Includes Texas, Illinois, Michigan, Minnesota, and major cities like Chicago, Austin, Dallas, Minneapolis, Detroit
+            - **North America**: Includes Canada and major Canadian cities
+            - **Europe**: Includes UK, Germany, France, Ireland, Netherlands and their major cities
+            - **Asia**: Includes Singapore, Japan, India, South Korea, Hong Kong
+            - **Australia**: Includes Sydney, Melbourne and other Australian locations
+            - **Remote**: Jobs specifically marked as fully remote
+            - **Hybrid**: Jobs with hybrid work arrangements
+            - **Other**: Locations that don't fit into the above categories
+            """)
+    
+    with tabs[5]:
+        st.subheader("Job Types by Work Arrangement")
+        fig6 = plot_location_type_distribution(display_data)
+        st.plotly_chart(fig6, use_container_width=True)
     
     # Job Market Analysis
     st.header("Job Market Analysis")
     
+    # Prepare geographical distribution data
+    geo_data = display_data.copy()
+    geo_data['region'] = geo_data['location'].apply(extract_region)
+    
     # Basic statistics in columns
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         st.metric(
@@ -323,6 +358,19 @@ else:
                 )
         else:
             st.metric(label="Latest Month Trend", value="N/A")
+            
+    with col4:
+        if not geo_data.empty:
+            most_common_region = geo_data['region'].value_counts().idxmax()
+            region_count = geo_data['region'].value_counts().max()
+            region_percent = (region_count / len(geo_data)) * 100
+            st.metric(
+                label="Most Common Region", 
+                value=most_common_region,
+                delta=f"{region_percent:.1f}% of all jobs"
+            )
+        else:
+            st.metric(label="Most Common Region", value="N/A")
     
     # Additional job market insights
     if not display_data.empty:
