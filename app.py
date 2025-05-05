@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import io
 import re
 import datetime
@@ -89,6 +90,15 @@ from utils.job_alerts import (
     delete_user_alert,
     get_matching_job_count,
     plot_preference_match_distribution
+)
+from utils.interview_tracker import (
+    validate_interview_data,
+    calculate_company_difficulty_ratings,
+    plot_company_difficulty_comparison,
+    plot_interview_difficulty_trend,
+    plot_interview_components_comparison,
+    plot_interview_success_factors,
+    get_interview_preparation_tips
 )
 
 # Set page configuration
@@ -341,7 +351,17 @@ else:
         "Market Health",
         "Live Data",
         "Resume Analysis",
-        "Job Alerts"
+        "Job Alerts",
+        "Interview Tracker",
+        "Compensation",
+        "Career Paths",
+        "Application Tracker",
+        "Sentiment Analysis",
+        "Networking",
+        "Learning Resources",
+        "Company Culture",
+        "User Profiles",
+        "Notifications"
     ])
     
     with tabs[0]:
@@ -1383,6 +1403,852 @@ else:
                 Paste your resume text in the box on the left and click "Analyze Resume Skills" to get started.
                 """)
                 
+    with tabs[15]:  # Interview Tracker Tab
+        st.subheader("Interview Difficulty Tracker")
+        
+        # Create tabs for different interview tracking features
+        interview_tabs = st.tabs([
+            "Company Difficulty Ratings", 
+            "Interview Trends", 
+            "Track New Interview", 
+            "Preparation Tips"
+        ])
+        
+        # Initialize interview data in session state if it doesn't exist
+        if "interview_data" not in st.session_state:
+            # Create sample interview data structure
+            st.session_state.interview_data = pd.DataFrame({
+                'company': display_data['company'].unique()[:10],  # Use some companies from job data
+                'job_title': ['Software Engineer', 'Full Stack Developer', 'Frontend Engineer', 
+                             'Backend Engineer', 'DevOps Engineer', 'Data Engineer', 
+                             'ML Engineer', 'Product Manager', 'QA Engineer', 'Mobile Developer'],
+                'date': pd.date_range(end=pd.Timestamp.today(), periods=10).date,
+                'difficulty_rating': [4, 3, 5, 4, 2, 5, 4, 3, 2, 4],  # 1-5 scale
+                'technical_difficulty': [4, 3, 5, 4, 3, 5, 5, 2, 3, 4],  # 1-5 scale
+                'behavioral_difficulty': [3, 4, 3, 3, 2, 4, 3, 5, 2, 3],  # 1-5 scale
+                'system_design': [5, 3, 4, 5, 2, 5, 4, 3, 1, 3],  # 1-5 scale
+                'algorithms': [4, 3, 5, 4, 2, 4, 5, 2, 3, 4],  # 1-5 scale
+                'outcome': ['Rejected', 'Offer', 'Pending', 'Rejected', 'Offer', 
+                           'Pending', 'Offer', 'Rejected', 'Offer', 'Pending'],
+                'rounds': [3, 4, 5, 3, 2, 5, 4, 3, 2, 3],
+                'coding_languages': ['Python,Java', 'JavaScript,TypeScript', 'React,CSS', 'Python,Go', 
+                                    'Bash,Python', 'Python,SQL', 'Python,TensorFlow', 'N/A', 
+                                    'Java,Selenium', 'Swift,Kotlin'],
+                'notes': ['Difficult system design question', 'Good interview experience', 
+                         'Many algorithm questions', 'Intense technical screening',
+                         'Simple interview process', 'Deep dive into past projects',
+                         'Complex ML problems', 'Focus on product thinking',
+                         'Test automation focus', 'Mobile-specific questions']
+            })
+        
+        with interview_tabs[0]:  # Company Difficulty Ratings
+            st.write("### Interview Difficulty by Company")
+            
+            # Company difficulty comparison
+            difficulty_fig = plot_company_difficulty_comparison(st.session_state.interview_data)
+            st.plotly_chart(difficulty_fig, use_container_width=True)
+            
+            # Show detailed ratings
+            st.write("### Detailed Company Ratings")
+            
+            # Calculate company ratings
+            company_ratings = calculate_company_difficulty_ratings(st.session_state.interview_data)
+            
+            if not company_ratings.empty:
+                # Add badge emojis based on difficulty
+                def difficulty_badge(difficulty):
+                    if difficulty >= 4.5:
+                        return "🔴 Very Hard"
+                    elif difficulty >= 3.5:
+                        return "🟠 Hard"
+                    elif difficulty >= 2.5:
+                        return "🟡 Moderate"
+                    else:
+                        return "🟢 Easy"
+                
+                company_ratings['Difficulty Level'] = company_ratings['avg_difficulty'].apply(difficulty_badge)
+                
+                # Show the ratings table
+                st.dataframe(
+                    company_ratings[['avg_difficulty', 'avg_technical', 'avg_behavioral', 'avg_system_design', 
+                                   'avg_algorithms', 'avg_rounds', 'Difficulty Level']]
+                    .sort_values('avg_difficulty', ascending=False)
+                    .rename(columns={
+                        'avg_difficulty': 'Overall Difficulty', 
+                        'avg_technical': 'Technical', 
+                        'avg_behavioral': 'Behavioral',
+                        'avg_system_design': 'System Design',
+                        'avg_algorithms': 'Algorithms',
+                        'avg_rounds': 'Avg. Rounds'
+                    }),
+                    use_container_width=True
+                )
+            else:
+                st.info("No interview data available yet.")
+            
+            # Compare interview components
+            st.write("### Interview Component Comparison")
+            component_fig = plot_interview_components_comparison(st.session_state.interview_data)
+            st.plotly_chart(component_fig, use_container_width=True)
+        
+        with interview_tabs[1]:  # Interview Trends
+            st.write("### Interview Difficulty Trends Over Time")
+            
+            trend_fig = plot_interview_difficulty_trend(st.session_state.interview_data)
+            st.plotly_chart(trend_fig, use_container_width=True)
+            
+            # Success factors analysis
+            st.write("### Success Factors in Interviews")
+            success_fig = plot_interview_success_factors(st.session_state.interview_data)
+            st.plotly_chart(success_fig, use_container_width=True)
+            
+            # Show insights
+            st.write("### Interview Success Insights")
+            
+            # Calculate success rates
+            offer_rate = (st.session_state.interview_data['outcome'] == 'Offer').mean() * 100
+            
+            # Calculate success rate by difficulty
+            success_by_difficulty = st.session_state.interview_data.groupby('difficulty_rating')['outcome'].apply(
+                lambda x: (x == 'Offer').mean() * 100
+            ).reset_index()
+            
+            # Display insights in columns
+            insight_col1, insight_col2 = st.columns(2)
+            
+            with insight_col1:
+                st.metric("Overall Success Rate", f"{offer_rate:.1f}%")
+                
+                st.write("**Success Rate by Difficulty Level:**")
+                for _, row in success_by_difficulty.iterrows():
+                    difficulty = int(row['difficulty_rating'])
+                    success_rate = row['outcome']
+                    st.write(f"Difficulty {difficulty}: {success_rate:.1f}% success rate")
+            
+            with insight_col2:
+                # Most successful languages or skills
+                if 'coding_languages' in st.session_state.interview_data.columns:
+                    # Flatten the languages list
+                    all_languages = []
+                    for langs in st.session_state.interview_data['coding_languages']:
+                        if isinstance(langs, str) and langs != 'N/A':
+                            all_languages.extend([l.strip() for l in langs.split(',')])
+                    
+                    # Count language frequencies
+                    if all_languages:
+                        lang_counts = pd.Series(all_languages).value_counts()
+                        
+                        st.write("**Most Requested Languages/Skills:**")
+                        for lang, count in lang_counts.items():
+                            st.write(f"• {lang}: {count} interviews")
+                
+                # Display notable insights
+                st.write("**Key Factors for Success:**")
+                st.write("• Technical preparation is critical for companies with difficulty > 4")
+                st.write("• System design questions strongly correlate with interview success")
+                st.write("• More interview rounds generally indicates a more rigorous process")
+        
+        with interview_tabs[2]:  # Track New Interview
+            st.write("### Track a New Interview Experience")
+            
+            # Form for adding new interview data
+            interview_col1, interview_col2 = st.columns(2)
+            
+            with interview_col1:
+                # Basic interview details
+                new_company = st.selectbox(
+                    "Company",
+                    options=sorted(display_data['company'].unique().tolist()),
+                    help="Select the company you interviewed with"
+                )
+                
+                new_job_title = st.text_input(
+                    "Job Title",
+                    help="Enter the job title you interviewed for"
+                )
+                
+                interview_date = st.date_input(
+                    "Interview Date",
+                    value=datetime.datetime.now().date(),
+                    help="Date of the interview"
+                )
+                
+                # Interview difficulty ratings
+                overall_difficulty = st.slider(
+                    "Overall Difficulty (1-5)",
+                    min_value=1,
+                    max_value=5,
+                    value=3,
+                    help="How difficult was the overall interview process"
+                )
+                
+                technical_difficulty = st.slider(
+                    "Technical Difficulty (1-5)",
+                    min_value=1,
+                    max_value=5,
+                    value=3,
+                    help="How difficult were the technical questions"
+                )
+                
+                behavioral_difficulty = st.slider(
+                    "Behavioral Difficulty (1-5)",
+                    min_value=1,
+                    max_value=5,
+                    value=3,
+                    help="How difficult were the behavioral questions"
+                )
+            
+            with interview_col2:
+                # Additional interview details
+                system_design = st.slider(
+                    "System Design Difficulty (1-5)",
+                    min_value=1,
+                    max_value=5,
+                    value=3,
+                    help="How difficult were the system design questions"
+                )
+                
+                algorithms = st.slider(
+                    "Algorithms Difficulty (1-5)",
+                    min_value=1,
+                    max_value=5,
+                    value=3,
+                    help="How difficult were the algorithm questions"
+                )
+                
+                rounds = st.number_input(
+                    "Number of Interview Rounds",
+                    min_value=1,
+                    max_value=10,
+                    value=3,
+                    help="How many interview rounds did you go through"
+                )
+                
+                outcome = st.selectbox(
+                    "Interview Outcome",
+                    options=["Pending", "Offer", "Rejected", "Withdrawn"],
+                    help="What was the outcome of the interview"
+                )
+                
+                coding_languages = st.text_input(
+                    "Coding Languages/Skills Tested (comma-separated)",
+                    help="What languages or skills were tested in the interview"
+                )
+                
+                notes = st.text_area(
+                    "Interview Notes",
+                    height=100,
+                    help="Add any notes or observations about the interview process"
+                )
+            
+            # Submit button for the new interview
+            if st.button("Save Interview Data"):
+                if new_company and new_job_title:
+                    # Create new interview entry
+                    new_interview = pd.DataFrame({
+                        'company': [new_company],
+                        'job_title': [new_job_title],
+                        'date': [interview_date],
+                        'difficulty_rating': [overall_difficulty],
+                        'technical_difficulty': [technical_difficulty],
+                        'behavioral_difficulty': [behavioral_difficulty],
+                        'system_design': [system_design],
+                        'algorithms': [algorithms],
+                        'outcome': [outcome],
+                        'rounds': [rounds],
+                        'coding_languages': [coding_languages],
+                        'notes': [notes]
+                    })
+                    
+                    # Add to existing data
+                    st.session_state.interview_data = pd.concat(
+                        [st.session_state.interview_data, new_interview], 
+                        ignore_index=True
+                    )
+                    
+                    st.success("Interview data saved successfully!")
+                    st.info("Switch to the 'Company Difficulty Ratings' or 'Interview Trends' tab to see updated data.")
+                else:
+                    st.error("Please fill in both Company and Job Title fields.")
+            
+            # Option to upload CSV of interview data
+            st.write("### Or Upload Interview Data")
+            
+            upload_interview = st.file_uploader(
+                "Upload Interview Data CSV",
+                type=["csv"],
+                help="Upload a CSV file with interview data"
+            )
+            
+            if upload_interview is not None:
+                try:
+                    interview_df = pd.read_csv(upload_interview)
+                    # Validate the data
+                    validated_df = validate_interview_data(interview_df)
+                    
+                    if validated_df is not None:
+                        # Add to existing data
+                        st.session_state.interview_data = pd.concat(
+                            [st.session_state.interview_data, validated_df], 
+                            ignore_index=True
+                        )
+                        st.success(f"Successfully loaded {len(validated_df)} interview records!")
+                    else:
+                        st.error("Invalid interview data format.")
+                        st.info("The CSV should include: company, job_title, date, difficulty_rating, outcome")
+                except Exception as e:
+                    st.error(f"Error loading interview data: {e}")
+        
+        with interview_tabs[3]:  # Preparation Tips
+            st.write("### Interview Preparation Tips")
+            
+            # Company selection for tips
+            tip_company = st.selectbox(
+                "Select Company",
+                options=["All Companies"] + sorted(st.session_state.interview_data['company'].unique().tolist()),
+                help="Select a company to get specific interview prep tips"
+            )
+            
+            # Job title selection for tips
+            job_options = ["All Job Titles"]
+            if tip_company != "All Companies":
+                company_jobs = st.session_state.interview_data[
+                    st.session_state.interview_data['company'] == tip_company
+                ]['job_title'].unique().tolist()
+                job_options.extend(company_jobs)
+            else:
+                job_options.extend(st.session_state.interview_data['job_title'].unique().tolist())
+            
+            tip_job = st.selectbox(
+                "Select Job Title",
+                options=job_options,
+                help="Select a job title to get specific interview prep tips"
+            )
+            
+            # Generate tips
+            if st.button("Generate Interview Preparation Tips"):
+                # Fix company and job title for the tips function
+                company_for_tips = None if tip_company == "All Companies" else tip_company
+                job_for_tips = None if tip_job == "All Job Titles" else tip_job
+                
+                # Get tips
+                tips = get_interview_preparation_tips(
+                    company_for_tips, 
+                    job_for_tips, 
+                    st.session_state.interview_data
+                )
+                
+                # Display tips
+                st.write(f"### Preparation Tips for {tip_company if company_for_tips else 'All Companies'}")
+                
+                tips_col1, tips_col2 = st.columns(2)
+                
+                with tips_col1:
+                    st.write("#### Technical Preparation")
+                    st.info(tips['technical_tips'])
+                    
+                    st.write("#### System Design Focus")
+                    st.info(tips['system_design_tips'])
+                
+                with tips_col2:
+                    st.write("#### Behavioral Preparation")
+                    st.info(tips['behavioral_tips'])
+                    
+                    st.write("#### Key Skills to Review")
+                    if tips['skill_tips']:
+                        for skill in tips['skill_tips']:
+                            st.write(f"• {skill}")
+                    else:
+                        st.write("No specific skills data available.")
+                
+                # Show expected difficulty level
+                st.write("#### Expected Interview Difficulty")
+                
+                # Create a gauge chart for expected difficulty
+                difficulty_gauge = go.Figure(go.Indicator(
+                    mode = "gauge+number",
+                    value = tips['expected_difficulty'],
+                    domain = {'x': [0, 1], 'y': [0, 1]},
+                    title = {'text': "Expected Difficulty"},
+                    gauge = {
+                        'axis': {'range': [0, 5], 'tickwidth': 1},
+                        'bar': {'color': "darkblue"},
+                        'steps': [
+                            {'range': [0, 2], 'color': "lightgreen"},
+                            {'range': [2, 3.5], 'color': "yellow"},
+                            {'range': [3.5, 5], 'color': "salmon"},
+                        ]
+                    }
+                ))
+                
+                difficulty_gauge.update_layout(height=250)
+                st.plotly_chart(difficulty_gauge, use_container_width=True)
+                
+                # Show common interview questions
+                st.write("#### Common Interview Questions")
+                for q in tips['common_questions']:
+                    st.markdown(f"**Q:** {q}")
+                
+                # Show interview structure
+                st.write("#### Typical Interview Process")
+                st.info(tips['interview_structure'])
+    
+    with tabs[16]:  # Compensation Benchmarking
+        st.subheader("Compensation Benchmarking")
+        
+        # Create tabs for different compensation analysis features
+        comp_tabs = st.tabs([
+            "Salary Trends", 
+            "Total Compensation", 
+            "Cost of Living Adjusted",
+            "Experience-Based Progression"
+        ])
+        
+        with comp_tabs[0]:  # Salary Trends
+            st.write("### Salary Trends by Job Type and Location")
+            
+            # Job type selection for salary trends
+            salary_job_types = st.multiselect(
+                "Select Job Types to Compare",
+                options=sorted(display_data['job_type'].unique().tolist()),
+                default=sorted(display_data['job_type'].unique().tolist())[:3],
+                help="Select job types to compare salary trends"
+            )
+            
+            # Region selection for salary comparison
+            geo_data = display_data.copy()
+            geo_data['region'] = geo_data['location'].apply(extract_region)
+            regions = sorted(geo_data['region'].unique().tolist())
+            
+            salary_regions = st.multiselect(
+                "Select Regions to Compare",
+                options=regions,
+                default=regions[:3] if len(regions) >= 3 else regions,
+                help="Select regions to compare salary trends"
+            )
+            
+            # Generate salary trend visualization
+            if salary_job_types and salary_regions:
+                # Create filtered data for salary analysis
+                salary_data = geo_data[geo_data['job_type'].isin(salary_job_types)]
+                salary_data = salary_data[salary_data['region'].isin(salary_regions)]
+                
+                # Clean and process salary data
+                salary_data['salary_numeric'] = salary_data['salary'].apply(lambda x: 
+                    float(re.sub(r'[^\d.]', '', x.split('-')[0])) if isinstance(x, str) and re.search(r'\d', x) else None
+                )
+                
+                # Remove rows without valid salary data
+                salary_data = salary_data.dropna(subset=['salary_numeric'])
+                
+                if not salary_data.empty:
+                    # Create salary trend charts
+                    fig = px.box(
+                        salary_data,
+                        x="job_type",
+                        y="salary_numeric",
+                        color="region",
+                        title="Salary Distribution by Job Type and Region",
+                        labels={"salary_numeric": "Annual Salary ($)", "job_type": "Job Type", "region": "Region"},
+                        category_orders={"job_type": sorted(salary_job_types)}
+                    )
+                    
+                    fig.update_layout(height=500)
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Show average salaries by job type
+                    st.write("### Average Salaries by Job Type")
+                    avg_salaries = salary_data.groupby('job_type')['salary_numeric'].mean().sort_values(ascending=False)
+                    
+                    avg_fig = px.bar(
+                        x=avg_salaries.index,
+                        y=avg_salaries.values,
+                        labels={"x": "Job Type", "y": "Average Annual Salary ($)"},
+                        color=avg_salaries.values,
+                        color_continuous_scale="Viridis"
+                    )
+                    
+                    avg_fig.update_layout(height=400)
+                    st.plotly_chart(avg_fig, use_container_width=True)
+                    
+                    # Show detailed salary statistics
+                    st.write("### Detailed Salary Statistics")
+                    salary_stats = salary_data.groupby('job_type')['salary_numeric'].agg([
+                        ('Average', 'mean'),
+                        ('Median', 'median'),
+                        ('Min', 'min'),
+                        ('Max', 'max'),
+                        ('Count', 'count')
+                    ]).sort_values('Average', ascending=False)
+                    
+                    # Format currency columns
+                    for col in ['Average', 'Median', 'Min', 'Max']:
+                        salary_stats[col] = salary_stats[col].apply(lambda x: f"${x:,.2f}")
+                    
+                    st.dataframe(salary_stats, use_container_width=True)
+                else:
+                    st.warning("No salary data available for the selected job types and regions.")
+                    st.info("Ensure that jobs have salary information in the dataset.")
+            else:
+                st.info("Please select at least one job type and region to view salary trends.")
+        
+        with comp_tabs[1]:  # Total Compensation
+            st.write("### Total Compensation Analysis")
+            
+            # Sample data for total compensation (in a real app, this would be from the database)
+            comp_data = pd.DataFrame({
+                'company': display_data['company'].unique()[:15],
+                'job_level': ['Junior', 'Mid-level', 'Senior', 'Staff', 'Principal',
+                             'Junior', 'Mid-level', 'Senior', 'Junior', 'Mid-level',
+                             'Senior', 'Staff', 'Mid-level', 'Senior', 'Principal'],
+                'base_salary': [85000, 120000, 160000, 185000, 210000,
+                               90000, 125000, 165000, 80000, 115000,
+                               155000, 180000, 130000, 170000, 205000],
+                'bonus': [5000, 15000, 30000, 40000, 60000,
+                         8000, 20000, 35000, 4000, 12000,
+                         25000, 35000, 18000, 30000, 50000],
+                'stock': [0, 20000, 50000, 90000, 150000,
+                         10000, 30000, 60000, 0, 15000,
+                         40000, 80000, 25000, 55000, 130000],
+                'benefits': [15000, 20000, 25000, 30000, 35000,
+                            15000, 20000, 25000, 15000, 20000,
+                            25000, 30000, 20000, 25000, 35000]
+            })
+            
+            # Calculate total compensation
+            comp_data['total_comp'] = comp_data['base_salary'] + comp_data['bonus'] + comp_data['stock'] + comp_data['benefits']
+            
+            # Company selection for total comp analysis
+            comp_companies = st.multiselect(
+                "Select Companies to Compare",
+                options=comp_data['company'].unique().tolist(),
+                default=comp_data['company'].unique().tolist()[:5],
+                help="Select companies to compare total compensation"
+            )
+            
+            if comp_companies:
+                filtered_comp = comp_data[comp_data['company'].isin(comp_companies)]
+                
+                # Create stacked bar chart for compensation breakdown
+                fig = px.bar(
+                    filtered_comp,
+                    x="company",
+                    y=["base_salary", "bonus", "stock", "benefits"],
+                    title="Total Compensation Breakdown by Company",
+                    labels={"value": "Amount ($)", "company": "Company", "variable": "Component"},
+                    color_discrete_map={
+                        "base_salary": "blue",
+                        "bonus": "green",
+                        "stock": "purple",
+                        "benefits": "gold"
+                    }
+                )
+                
+                fig.update_layout(height=500, barmode='stack')
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Show compensation by level across companies
+                st.write("### Compensation by Level")
+                
+                level_fig = px.box(
+                    filtered_comp,
+                    x="job_level",
+                    y="total_comp",
+                    color="company",
+                    title="Total Compensation by Job Level",
+                    labels={"total_comp": "Total Compensation ($)", "job_level": "Job Level", "company": "Company"},
+                    category_orders={"job_level": ["Junior", "Mid-level", "Senior", "Staff", "Principal"]}
+                )
+                
+                level_fig.update_layout(height=500)
+                st.plotly_chart(level_fig, use_container_width=True)
+                
+                # Show detailed compensation data
+                st.write("### Detailed Compensation Data")
+                comp_columns = ['company', 'job_level', 'base_salary', 'bonus', 'stock', 'benefits', 'total_comp']
+                st.dataframe(filtered_comp[comp_columns].sort_values(['company', 'job_level']), use_container_width=True)
+            else:
+                st.info("Please select at least one company to view total compensation analysis.")
+        
+        with comp_tabs[2]:  # Cost of Living Adjusted
+            st.write("### Cost of Living Adjusted Salaries")
+            
+            # Sample cost of living index data (100 = national average)
+            col_data = {
+                "US West": 140,
+                "US East": 125,
+                "US Central": 95,
+                "North America": 110,
+                "Europe": 120,
+                "Asia": 90,
+                "Australia": 130,
+                "Remote": 100,  # Using national average for remote
+                "Hybrid": 110,  # Slightly above average for hybrid
+                "Other": 100    # Using national average for other
+            }
+            
+            # Show COL index reference table
+            st.write("#### Cost of Living Index by Region")
+            
+            # Create COL index dataframe for display
+            col_df = pd.DataFrame(list(col_data.items()), columns=['Region', 'COL Index'])
+            col_df = col_df.sort_values('COL Index', ascending=False)
+            
+            # Display the COL index table
+            col1, col2 = st.columns([1, 2])
+            
+            with col1:
+                st.dataframe(col_df, use_container_width=True)
+                
+                st.info("""
+                **Note:** The Cost of Living (COL) Index shows relative living costs.
+                * 100 = national average
+                * Values above 100 indicate higher cost of living
+                * Values below 100 indicate lower cost of living
+                
+                Adjusted salaries show the purchasing power in each region.
+                """)
+            
+            with col2:
+                # Create a choropleth map showing cost of living
+                base_fig = go.Figure()
+                
+                # Add a bar chart for COL index
+                base_fig.add_trace(go.Bar(
+                    x=col_df['Region'],
+                    y=col_df['COL Index'],
+                    marker_color='darkblue',
+                    name='COL Index'
+                ))
+                
+                base_fig.update_layout(
+                    title="Cost of Living Index by Region",
+                    xaxis_title="Region",
+                    yaxis_title="Cost of Living Index",
+                    height=400
+                )
+                
+                st.plotly_chart(base_fig, use_container_width=True)
+            
+            # Job type selection for COL-adjusted analysis
+            col_job_type = st.selectbox(
+                "Select Job Type",
+                options=sorted(display_data['job_type'].unique().tolist()),
+                help="Select a job type to view COL-adjusted salaries"
+            )
+            
+            # Filter salary data for the selected job type
+            geo_data = display_data.copy()
+            geo_data['region'] = geo_data['location'].apply(extract_region)
+            
+            job_salary_data = geo_data[geo_data['job_type'] == col_job_type].copy()
+            
+            # Clean and process salary data
+            job_salary_data['salary_numeric'] = job_salary_data['salary'].apply(lambda x: 
+                float(re.sub(r'[^\d.]', '', x.split('-')[0])) if isinstance(x, str) and re.search(r'\d', x) else None
+            )
+            
+            # Remove rows without valid salary data
+            job_salary_data = job_salary_data.dropna(subset=['salary_numeric'])
+            
+            if not job_salary_data.empty:
+                # Calculate regional average salaries
+                region_salaries = job_salary_data.groupby('region')['salary_numeric'].mean().reset_index()
+                
+                # Add COL index and calculate adjusted salaries
+                region_salaries['col_index'] = region_salaries['region'].map(col_data)
+                region_salaries['adjusted_salary'] = region_salaries['salary_numeric'] * (100 / region_salaries['col_index'])
+                
+                # Display comparison of nominal vs. adjusted salaries
+                st.write(f"### {col_job_type} Salaries: Nominal vs. COL-Adjusted")
+                
+                # Create a bar chart comparing nominal and adjusted salaries
+                compare_fig = go.Figure()
+                
+                # Add nominal salary bars
+                compare_fig.add_trace(go.Bar(
+                    x=region_salaries['region'],
+                    y=region_salaries['salary_numeric'],
+                    name='Nominal Salary',
+                    marker_color='blue'
+                ))
+                
+                # Add adjusted salary bars
+                compare_fig.add_trace(go.Bar(
+                    x=region_salaries['region'],
+                    y=region_salaries['adjusted_salary'],
+                    name='COL-Adjusted Salary',
+                    marker_color='green'
+                ))
+                
+                # Update the layout
+                compare_fig.update_layout(
+                    title=f"{col_job_type} - Regional Salaries: Nominal vs. COL-Adjusted",
+                    xaxis_title="Region",
+                    yaxis_title="Annual Salary ($)",
+                    height=500,
+                    barmode='group'
+                )
+                
+                st.plotly_chart(compare_fig, use_container_width=True)
+                
+                # Display the data table with both nominal and adjusted salaries
+                st.write("### Detailed Salary Adjustment Data")
+                
+                # Format the data for display
+                display_cols = ['region', 'salary_numeric', 'col_index', 'adjusted_salary']
+                display_df = region_salaries[display_cols].sort_values('adjusted_salary', ascending=False)
+                
+                # Rename columns for better display
+                display_df = display_df.rename(columns={
+                    'region': 'Region',
+                    'salary_numeric': 'Nominal Salary',
+                    'col_index': 'COL Index',
+                    'adjusted_salary': 'Adjusted Salary'
+                })
+                
+                # Format currency columns
+                display_df['Nominal Salary'] = display_df['Nominal Salary'].apply(lambda x: f"${x:,.2f}")
+                display_df['Adjusted Salary'] = display_df['Adjusted Salary'].apply(lambda x: f"${x:,.2f}")
+                
+                st.dataframe(display_df, use_container_width=True)
+                
+                # Show insights about the best value regions
+                st.write("### Regional Value Insights")
+                
+                # Identify the best value region (highest adjusted salary)
+                best_value_region = region_salaries.loc[region_salaries['adjusted_salary'].idxmax(), 'region']
+                best_value_adjustment = region_salaries.loc[region_salaries['adjusted_salary'].idxmax(), 'adjusted_salary'] / \
+                                      region_salaries.loc[region_salaries['adjusted_salary'].idxmax(), 'salary_numeric']
+                
+                st.success(f"""
+                **Best Value Region:** {best_value_region}
+                
+                In {best_value_region}, your salary has {best_value_adjustment:.2f}x the purchasing power compared to the nominal amount.
+                This makes it potentially the most economically advantageous region for this job type when considering cost of living.
+                """)
+            else:
+                st.warning(f"No salary data available for {col_job_type}.")
+                st.info("Ensure that jobs have salary information in the dataset.")
+        
+        with comp_tabs[3]:  # Experience-Based Progression
+            st.write("### Salary Progression by Experience Level")
+            
+            # Sample experience level data
+            experience_data = pd.DataFrame({
+                'company': np.repeat(display_data['company'].unique()[:5], 5),
+                'job_type': np.tile(display_data['job_type'].unique()[:5], 5),
+                'years_experience': np.tile([0, 2, 5, 8, 12], 5),
+                'salary': [
+                    # Company 1
+                    80000, 100000, 130000, 160000, 190000,
+                    # Company 2
+                    85000, 105000, 135000, 165000, 195000,
+                    # Company 3
+                    75000, 95000, 125000, 155000, 185000,
+                    # Company 4
+                    90000, 110000, 140000, 170000, 200000,
+                    # Company 5
+                    82000, 102000, 132000, 162000, 192000
+                ]
+            })
+            
+            # Job type selection for progression analysis
+            prog_job_type = st.selectbox(
+                "Select Job Type for Progression Analysis",
+                options=experience_data['job_type'].unique().tolist(),
+                key="progression_job_type",
+                help="Select a job type to view salary progression by experience"
+            )
+            
+            # Filter data for the selected job type
+            job_prog_data = experience_data[experience_data['job_type'] == prog_job_type]
+            
+            # Plot salary progression lines for each company
+            prog_fig = px.line(
+                job_prog_data,
+                x="years_experience",
+                y="salary",
+                color="company",
+                markers=True,
+                title=f"Salary Progression by Years of Experience - {prog_job_type}",
+                labels={"salary": "Annual Salary ($)", "years_experience": "Years of Experience", "company": "Company"}
+            )
+            
+            prog_fig.update_layout(height=500)
+            st.plotly_chart(prog_fig, use_container_width=True)
+            
+            # Add experience milestones explanation
+            st.write("### Experience Level Milestones")
+            
+            milestone_col1, milestone_col2 = st.columns(2)
+            
+            with milestone_col1:
+                st.info("""
+                **Experience Level Definitions**
+                
+                * **Entry Level (0-2 years):** New graduates, junior positions
+                * **Mid-Level (3-5 years):** Experienced professionals with some autonomy
+                * **Senior (6-9 years):** Leadership roles, deep expertise in area
+                * **Staff/Principal (10+ years):** Strategic leadership, company-wide impact
+                """)
+            
+            with milestone_col2:
+                # Calculate average progression rates
+                baseline = job_prog_data[job_prog_data['years_experience'] == 0]['salary'].mean()
+                
+                # Calculate average salaries at each experience level
+                avg_by_exp = job_prog_data.groupby('years_experience')['salary'].mean()
+                
+                # Calculate growth from baseline
+                growth_rates = [(avg / baseline - 1) * 100 for avg in avg_by_exp]
+                
+                # Display growth metrics
+                st.write("**Average Salary Growth from Entry Level**")
+                
+                for i, years in enumerate(sorted(job_prog_data['years_experience'].unique())):
+                    if years == 0:
+                        continue
+                    
+                    growth = growth_rates[i]
+                    st.metric(
+                        label=f"{years} Years Experience",
+                        value=f"${avg_by_exp[years]:,.0f}",
+                        delta=f"{growth:.1f}%"
+                    )
+            
+            # Show table of experience-based progression data
+            st.write("### Detailed Progression Data by Company")
+            
+            # Format the progression table
+            prog_table = job_prog_data.pivot(index='company', columns='years_experience', values='salary')
+            prog_table.columns = [f"{col} Years" for col in prog_table.columns]
+            
+            # Calculate growth percentages
+            for company in prog_table.index:
+                baseline = prog_table.loc[company, '0 Years']
+                for col in prog_table.columns[1:]:
+                    current = prog_table.loc[company, col]
+                    growth_pct = (current / baseline - 1) * 100
+                    prog_table.loc[company, f"{col} Growth"] = f"{growth_pct:.1f}%"
+            
+            # Reorder columns to alternate salary and growth
+            new_cols = []
+            for year in [0, 2, 5, 8, 12]:
+                new_cols.append(f"{year} Years")
+                if year > 0:
+                    new_cols.append(f"{year} Years Growth")
+            
+            # Select and display the table
+            display_prog = prog_table[new_cols]
+            
+            # Format salary columns
+            for col in display_prog.columns:
+                if "Growth" not in col:
+                    display_prog[col] = display_prog[col].apply(lambda x: f"${x:,.0f}")
+            
+            st.dataframe(display_prog, use_container_width=True)
+    
     with tabs[14]:  # Job Alerts Tab
         st.subheader("Personalized Job Alerts")
         
