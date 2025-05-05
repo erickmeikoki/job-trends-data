@@ -101,7 +101,8 @@ else:  # Manual data entry
         job_type = st.selectbox(
             "Job Type",
             ["Frontend", "Backend", "Full-Stack", "DevOps", "Data Engineering", 
-             "Machine Learning", "Mobile", "QA/Testing", "Other"]
+             "Machine Learning", "Mobile", "QA/Testing", "Cybersecurity", 
+             "Game Development", "Embedded", "AR/VR", "Other"]
         )
         
         company = st.text_input("Company")

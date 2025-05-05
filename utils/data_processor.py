@@ -32,31 +32,131 @@ def process_data(df):
     if 'job_type' in processed_df.columns:
         # Mapping to standardize job type categories
         job_type_mapping = {
+            # Frontend
             'front end': 'Frontend',
             'frontend': 'Frontend',
             'front-end': 'Frontend',
+            'ui': 'Frontend',
+            'ui/ux': 'Frontend',
+            'javascript': 'Frontend',
+            'react': 'Frontend',
+            'angular': 'Frontend',
+            'vue': 'Frontend',
+            
+            # Backend
             'back end': 'Backend',
             'backend': 'Backend',
             'back-end': 'Backend',
+            'api': 'Backend',
+            'server': 'Backend',
+            'python': 'Backend',
+            'java': 'Backend',
+            'node': 'Backend',
+            'php': 'Backend',
+            'go': 'Backend',
+            'golang': 'Backend',
+            'ruby': 'Backend',
+            
+            # Full-Stack
             'full stack': 'Full-Stack',
             'fullstack': 'Full-Stack',
             'full-stack': 'Full-Stack',
+            'web developer': 'Full-Stack',
+            'web engineer': 'Full-Stack',
+            'mern': 'Full-Stack',
+            'mean': 'Full-Stack',
+            
+            # DevOps
             'devops': 'DevOps',
             'dev ops': 'DevOps',
             'dev-ops': 'DevOps',
+            'sre': 'DevOps',
+            'site reliability': 'DevOps',
+            'platform': 'DevOps',
+            'infrastructure': 'DevOps',
+            'cloud': 'DevOps',
+            'aws': 'DevOps',
+            'azure': 'DevOps',
+            'gcp': 'DevOps',
+            'kubernetes': 'DevOps',
+            'k8s': 'DevOps',
+            'docker': 'DevOps',
+            
+            # Data Engineering
             'data engineer': 'Data Engineering',
             'data engineering': 'Data Engineering',
+            'etl': 'Data Engineering',
+            'database': 'Data Engineering',
+            'sql': 'Data Engineering',
+            'big data': 'Data Engineering',
+            'data pipeline': 'Data Engineering',
+            'data warehouse': 'Data Engineering',
+            
+            # Machine Learning
             'machine learning': 'Machine Learning',
             'ml': 'Machine Learning',
             'ai': 'Machine Learning',
             'artificial intelligence': 'Machine Learning',
-            'qa': 'QA/Testing',
-            'quality assurance': 'QA/Testing',
-            'testing': 'QA/Testing',
+            'data science': 'Machine Learning',
+            'data scientist': 'Machine Learning',
+            'nlp': 'Machine Learning',
+            'computer vision': 'Machine Learning',
+            'deep learning': 'Machine Learning',
+            
+            # Mobile
             'mobile': 'Mobile',
             'ios': 'Mobile',
             'android': 'Mobile',
-            'qa/testing': 'QA/Testing'
+            'react native': 'Mobile',
+            'flutter': 'Mobile',
+            'swift': 'Mobile',
+            'kotlin': 'Mobile',
+            'app developer': 'Mobile',
+            
+            # QA/Testing
+            'qa': 'QA/Testing',
+            'quality assurance': 'QA/Testing',
+            'testing': 'QA/Testing',
+            'qa/testing': 'QA/Testing',
+            'sdet': 'QA/Testing',
+            'test': 'QA/Testing',
+            
+            # Cybersecurity
+            'security': 'Cybersecurity',
+            'cyber': 'Cybersecurity',
+            'cybersecurity': 'Cybersecurity',
+            'pentest': 'Cybersecurity',
+            'penetration test': 'Cybersecurity',
+            'hacker': 'Cybersecurity',
+            'ethical hacker': 'Cybersecurity',
+            'infosec': 'Cybersecurity',
+            'information security': 'Cybersecurity',
+            
+            # Game Development
+            'game': 'Game Development',
+            'unity': 'Game Development',
+            'unreal': 'Game Development',
+            'game developer': 'Game Development',
+            'game programming': 'Game Development',
+            
+            # Embedded
+            'embedded': 'Embedded',
+            'firmware': 'Embedded',
+            'iot': 'Embedded',
+            'microcontroller': 'Embedded',
+            'hardware': 'Embedded',
+            'rtos': 'Embedded',
+            'fpga': 'Embedded',
+            
+            # AR/VR
+            'ar': 'AR/VR',
+            'vr': 'AR/VR',
+            'xr': 'AR/VR',
+            'augmented reality': 'AR/VR',
+            'virtual reality': 'AR/VR',
+            'mixed reality': 'AR/VR',
+            'metaverse': 'AR/VR',
+            '3d': 'AR/VR'
         }
         
         # Apply mapping (case-insensitive)
