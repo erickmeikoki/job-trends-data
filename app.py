@@ -18,6 +18,12 @@ from utils.visualizer import (
     plot_location_type_distribution,
     extract_region
 )
+from utils.predictor import (
+    forecast_job_trends,
+    predict_job_type_growth,
+    plot_job_forecast,
+    plot_job_type_growth_forecast
+)
 
 # Set page configuration
 st.set_page_config(
@@ -260,7 +266,8 @@ else:
         "Time Series Analysis", 
         "Company Distribution",
         "Geographical Distribution",
-        "Remote vs On-site"
+        "Remote vs On-site",
+        "Predictions & Forecasts"
     ])
     
     with tabs[0]:
@@ -308,6 +315,99 @@ else:
         st.subheader("Job Types by Work Arrangement")
         fig6 = plot_location_type_distribution(display_data)
         st.plotly_chart(fig6, use_container_width=True)
+        
+    with tabs[6]:
+        st.subheader("Predictive Analytics")
+        
+        # Only show predictions if we have enough data
+        if len(display_data['month_year'].unique()) >= 3:
+            # Forecasting options
+            pred_col1, pred_col2 = st.columns([1, 3])
+            
+            with pred_col1:
+                # Forecast period selection
+                forecast_periods = st.slider(
+                    "Forecast Periods (Months)",
+                    min_value=1,
+                    max_value=12,
+                    value=6,
+                    step=1,
+                    help="Number of future months to forecast"
+                )
+                
+                # Job type selection for specific forecasts
+                job_type_options = ["All Jobs"] + display_data['job_type'].unique().tolist()
+                selected_job_type = st.selectbox(
+                    "Job Type to Forecast",
+                    options=job_type_options
+                )
+                
+                # Fix job type selection
+                forecast_job_type = None if selected_job_type == "All Jobs" else selected_job_type
+                
+                st.write("### Insights")
+                st.info("""
+                **How it works:** The prediction model uses past job posting trends to forecast 
+                future patterns. The forecast shows the expected number of job postings for 
+                future months based on historical data patterns.
+                
+                Confidence intervals (shaded area) show the range of possible values, with wider 
+                intervals indicating greater uncertainty.
+                """)
+                
+                # Show accuracy disclaimer
+                st.warning("""
+                **Note:** Prediction accuracy depends on data quantity and quality. 
+                More historical data provides better predictions.
+                """)
+            
+            with pred_col2:
+                # Job Posting Forecast
+                try:
+                    forecast_fig = plot_job_forecast(
+                        display_data, 
+                        periods=forecast_periods,
+                        job_type=forecast_job_type
+                    )
+                    st.plotly_chart(forecast_fig, use_container_width=True)
+                except Exception as e:
+                    st.error(f"Error generating forecast: {e}")
+                    st.info("Try selecting a different job type or adjusting the forecast period.")
+            
+            # Job Growth Prediction
+            st.subheader("Predicted Job Type Growth")
+            
+            try:
+                # Calculate growth rates
+                growth_rates = predict_job_type_growth(display_data, periods=forecast_periods)
+                
+                # Plot growth rates
+                growth_fig = plot_job_type_growth_forecast(growth_rates)
+                st.plotly_chart(growth_fig, use_container_width=True)
+                
+                # Show detailed growth table
+                st.write("#### Detailed Growth Projections")
+                st.dataframe(growth_rates, use_container_width=True)
+                
+                # Highlight fastest growing job types
+                if not growth_rates.empty:
+                    fastest_growing = growth_rates.index[0]
+                    growth_pct = growth_rates.loc[fastest_growing, 'Growth %']
+                    
+                    if growth_pct > 0:
+                        st.success(f"🚀 **Fastest growing job type:** {fastest_growing} with projected growth of {growth_pct:.1f}%")
+                    
+                    # Highlight declining job types
+                    declining = growth_rates[growth_rates['Growth %'] < 0]
+                    if not declining.empty:
+                        st.warning(f"📉 **{len(declining)} job types show declining trends** in the forecast period.")
+            
+            except Exception as e:
+                st.error(f"Error generating job growth predictions: {e}")
+                st.info("This may be due to insufficient data for certain job types.")
+        else:
+            st.warning("⚠️ Not enough data for predictions. At least 3 months of data is required.")
+            st.info("Add more job postings across different months to enable predictive analytics.")
     
     # Job Market Analysis
     st.header("Job Market Analysis")
@@ -377,3 +477,69 @@ else:
         st.subheader("Job Type Distribution")
         job_type_counts = display_data['job_type'].value_counts()
         st.bar_chart(job_type_counts)
+        
+        # Future Job Market Forecast
+        if len(display_data['month_year'].unique()) >= 3:
+            st.subheader("Future Job Market Forecast")
+            
+            forecast_col1, forecast_col2 = st.columns([3, 1])
+            
+            with forecast_col1:
+                # Add a 3-month forecast for all jobs
+                try:
+                    quick_forecast_fig = plot_job_forecast(
+                        display_data, 
+                        periods=3,  # 3-month forecast
+                        job_type=None  # All jobs
+                    )
+                    st.plotly_chart(quick_forecast_fig, use_container_width=True)
+                except Exception as e:
+                    st.error(f"Error generating quick forecast: {e}")
+            
+            with forecast_col2:
+                # Show key insights
+                try:
+                    # Get growth rates for next 3 months
+                    growth_rates = predict_job_type_growth(display_data, periods=3)
+                    
+                    if not growth_rates.empty:
+                        st.write("### Key Growth Insights")
+                        
+                        # Get fastest growing job type
+                        fastest_growing = growth_rates.index[0]
+                        growth_pct = growth_rates.loc[fastest_growing, 'Growth %']
+                        
+                        st.metric(
+                            label="Fastest Growing Job Type", 
+                            value=fastest_growing,
+                            delta=f"{growth_pct:.1f}%"
+                        )
+                        
+                        # Get most declining job type (if any are declining)
+                        declining = growth_rates[growth_rates['Growth %'] < 0]
+                        if not declining.empty:
+                            most_declining = declining.index[-1]
+                            decline_pct = growth_rates.loc[most_declining, 'Growth %']
+                            
+                            st.metric(
+                                label="Most Declining Job Type", 
+                                value=most_declining,
+                                delta=f"{decline_pct:.1f}%"
+                            )
+                        
+                        # Overall market prediction
+                        overall_growth = growth_rates['Growth %'].mean()
+                        market_sentiment = "Growing" if overall_growth > 0 else "Declining"
+                        
+                        st.metric(
+                            label="Overall Market Prediction", 
+                            value=market_sentiment,
+                            delta=f"{overall_growth:.1f}% avg"
+                        )
+                        
+                        # Show note about predictions
+                        st.info("These predictions are based on current trends and may change as new data becomes available.")
+                
+                except Exception as e:
+                    st.error(f"Error generating growth insights: {e}")
+                    st.info("Try adding more job posting data across a wider time range.")
