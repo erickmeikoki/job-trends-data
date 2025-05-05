@@ -3,6 +3,8 @@ import pandas as pd
 import io
 import re
 import datetime
+import plotly.express as px
+import plotly.graph_objects as go
 from utils.data_processor import process_data, generate_sample_schema
 from utils.database import (
     get_all_job_postings, 
@@ -52,7 +54,8 @@ from utils.company_analyzer import (
     detect_hiring_surges,
     plot_hiring_alerts,
     analyze_company_seasonality,
-    compare_company_job_types
+    compare_company_job_types,
+    calculate_company_growth_rates
 )
 from utils.market_health import (
     calculate_job_market_health_index,
@@ -63,6 +66,7 @@ from utils.market_health import (
 )
 from utils.live_data import (
     fetch_job_data_from_api,
+    process_api_response,
     scrape_jobs_from_website,
     schedule_data_refresh,
     import_jobs_from_linkedin_export,
@@ -73,6 +77,7 @@ from utils.resume_analyzer import (
     compare_resume_to_market,
     find_matching_job_types,
     plot_skill_gap_analysis,
+    plot_job_type_matches,
     generate_skill_improvement_recommendations
 )
 from utils.job_alerts import (
@@ -80,7 +85,10 @@ from utils.job_alerts import (
     rank_job_matches,
     extract_user_preferences_from_text,
     save_user_alert,
-    get_saved_alerts
+    get_saved_alerts,
+    delete_user_alert,
+    get_matching_job_count,
+    plot_preference_match_distribution
 )
 
 # Set page configuration
@@ -940,3 +948,798 @@ else:
             except Exception as e:
                 st.error(f"Error calculating company growth rates: {e}")
                 st.info("This analysis requires data from multiple time periods.")
+                
+    with tabs[11]:  # Market Health Tab
+        st.subheader("Job Market Health Index")
+        
+        # Create columns for overview
+        health_col1, health_col2 = st.columns([2, 1])
+        
+        try:
+            # Calculate market health index
+            if len(display_data['month_year'].unique()) >= 2:
+                health_data = calculate_job_market_health_index(display_data)
+                
+                if not health_data.empty:
+                    with health_col1:
+                        # Plot market health index
+                        health_fig = plot_job_market_health_index(display_data)
+                        st.plotly_chart(health_fig, use_container_width=True)
+                    
+                    with health_col2:
+                        # Get market health insights
+                        health_insights = get_market_health_insights(display_data)
+                        
+                        if health_insights['has_data']:
+                            # Display market health dashboard
+                            st.markdown(f"### Current Market: {health_insights['sentiment']}")
+                            
+                            # Create gauge chart for health index
+                            current_index = health_insights['current_index']
+                            
+                            gauge_fig = go.Figure(go.Indicator(
+                                mode = "gauge+number+delta",
+                                value = current_index,
+                                domain = {'x': [0, 1], 'y': [0, 1]},
+                                title = {'text': "Market Health", 'font': {'size': 20}},
+                                delta = {'reference': 50, 'position': "bottom"},
+                                gauge = {
+                                    'axis': {'range': [0, 100], 'tickwidth': 1},
+                                    'bar': {'color': health_insights['color']},
+                                    'steps': [
+                                        {'range': [0, 30], 'color': 'firebrick'},
+                                        {'range': [30, 45], 'color': 'darkorange'},
+                                        {'range': [45, 55], 'color': 'cornflowerblue'},
+                                        {'range': [55, 70], 'color': 'forestgreen'},
+                                        {'range': [70, 100], 'color': 'darkgreen'},
+                                    ],
+                                    'threshold': {
+                                        'line': {'color': "black", 'width': 2},
+                                        'thickness': 0.75,
+                                        'value': 50
+                                    }
+                                }
+                            ))
+                            
+                            gauge_fig.update_layout(height=200, margin=dict(l=10, r=10, t=30, b=10))
+                            st.plotly_chart(gauge_fig, use_container_width=True)
+                            
+                            # Add market description
+                            st.info(health_insights['description'])
+                            
+                            # Add trend information
+                            st.write(f"**Market Trend:** {health_insights['trend_icon']} {health_insights['trend']}")
+                            st.write(health_insights['trend_description'])
+                            
+                            # Show when last updated
+                            st.write(f"*Last updated: {health_insights['last_updated']}*")
+                    
+                    # Show market health components
+                    st.subheader("Market Health Components")
+                    component_fig = plot_market_health_components(display_data)
+                    st.plotly_chart(component_fig, use_container_width=True)
+                    
+                    with st.expander("Understanding the Market Health Index"):
+                        st.markdown("""
+                        ### How the Market Health Index is Calculated
+                        
+                        The Job Market Health Index is a composite score based on several factors:
+                        
+                        - **Job Count**: Total number of job postings (40% weight)
+                        - **Company Diversity**: Number of different companies posting jobs (20% weight)
+                        - **Job Type Diversity**: Variety of job types available (20% weight)
+                        - **Location Diversity**: Geographical distribution of opportunities (10% weight)
+                        - **Remote Ratio**: Proportion of remote job opportunities (10% weight)
+                        
+                        The index is normalized to a 0-100 scale where:
+                        - **0-30**: Very Weak market
+                        - **30-45**: Weak market
+                        - **45-55**: Stable market
+                        - **55-70**: Strong market
+                        - **70-100**: Very Strong market
+                        
+                        A higher index indicates a healthier job market with more opportunities and choices for job seekers.
+                        """)
+                    
+                    # Regional health comparison if enough data
+                    if len(display_data) >= 10:
+                        st.subheader("Regional Market Health Comparison")
+                        regional_fig = plot_regional_health_comparison(display_data)
+                        st.plotly_chart(regional_fig, use_container_width=True)
+                        
+                        st.info("This analysis compares job market health across different regions. Higher values indicate regions with stronger job markets based on job counts, company diversity, and other factors.")
+                else:
+                    st.info("Insufficient data to calculate the job market health index.")
+                    st.write("The market health analysis requires data across multiple time periods.")
+            else:
+                st.info("At least 2 months of data are required to calculate the job market health index.")
+                st.write("Try adding more job postings across different months.")
+        
+        except Exception as e:
+            st.error(f"Error analyzing market health: {e}")
+            st.info("This analysis requires data with sufficient variability across time periods.")
+            
+    with tabs[12]:  # Live Data Tab
+        st.subheader("Live Job Data Integration")
+        
+        # Create tabs for different live data sources
+        live_tabs = st.tabs(["API Integration", "Web Scraping", "External Imports"])
+        
+        with live_tabs[0]:  # API Integration
+            st.write("### Connect to External Job API")
+            
+            api_col1, api_col2 = st.columns([1, 1])
+            
+            with api_col1:
+                # API configuration
+                api_key = st.text_input("API Key", type="password", help="Enter your API key for the job data service")
+                location = st.text_input("Location (optional)", help="Filter jobs by location")
+                job_type_filter = st.selectbox(
+                    "Job Type Filter",
+                    ["All"] + display_data['job_type'].unique().tolist(),
+                    help="Filter jobs by type"
+                )
+                
+                # Convert "All" to None for the API
+                job_type_api = None if job_type_filter == "All" else job_type_filter
+                
+            with api_col2:
+                st.info("""
+                **How API Integration Works:**
+                
+                1. Connect to external job posting APIs like LinkedIn, Indeed, or specialized tech job boards
+                2. Automatically fetch and process new job postings
+                3. Store in your database for analysis
+                
+                **Benefits:**
+                - Real-time job market data
+                - Automated data collection
+                - Consistent formatting
+                """)
+                
+                # Fetch button
+                if st.button("Fetch Jobs from API"):
+                    if not api_key:
+                        st.warning("Please enter an API key to connect to the job data service.")
+                    else:
+                        with st.spinner("Fetching job data from API..."):
+                            # Call the API function
+                            try:
+                                api_data = fetch_job_data_from_api(
+                                    api_key=api_key,
+                                    location=location,
+                                    job_type=job_type_api
+                                )
+                                
+                                if "error" in api_data:
+                                    st.error(f"API Error: {api_data['error']}")
+                                else:
+                                    # Process API response
+                                    api_df = process_api_response(api_data)
+                                    
+                                    if api_df is not None and not api_df.empty:
+                                        st.success(f"Successfully fetched {len(api_df)} job postings!")
+                                        
+                                        # Show preview
+                                        st.write("#### Job Data Preview")
+                                        st.dataframe(api_df.head())
+                                        
+                                        # Option to add to database
+                                        if st.button("Add Jobs to Database"):
+                                            add_multiple_job_postings(api_df)
+                                            st.success("Jobs added to database!")
+                                            st.info("Refresh the page to see the updated data.")
+                                    else:
+                                        st.warning("No job data was returned from the API.")
+                            except Exception as e:
+                                st.error(f"Error connecting to API: {e}")
+                
+                # Auto-refresh options
+                st.write("### Automated Data Refresh")
+                refresh_interval = st.number_input("Refresh Interval (hours)", min_value=1, max_value=168, value=24)
+                
+                if st.button("Schedule Auto Refresh"):
+                    if not api_key:
+                        st.warning("Please enter an API key to schedule refresh.")
+                    else:
+                        refresh_status = schedule_data_refresh(
+                            refresh_interval=refresh_interval,
+                            api_key=api_key,
+                            max_jobs=50
+                        )
+                        st.info(refresh_status)
+        
+        with live_tabs[1]:  # Web Scraping
+            st.write("### Web Scraping Job Data")
+            
+            scrape_col1, scrape_col2 = st.columns([1, 1])
+            
+            with scrape_col1:
+                # Scraping configuration
+                website_url = st.text_input("Website URL", help="Enter the URL of the job board to scrape")
+                max_jobs = st.slider("Maximum Jobs to Scrape", 10, 100, 30)
+            
+            with scrape_col2:
+                st.info("""
+                **Web Scraping Guidelines:**
+                
+                1. Only scrape public job postings
+                2. Respect website terms of service
+                3. Add delays between requests
+                
+                **Supported Job Boards:**
+                - Job posting aggregators
+                - Company career pages
+                - Public job boards
+                """)
+                
+                # Scrape button
+                if st.button("Scrape Job Data"):
+                    if not website_url:
+                        st.warning("Please enter a website URL to scrape.")
+                    else:
+                        with st.spinner("Scraping job data..."):
+                            try:
+                                # Call the scraping function
+                                scraped_df = scrape_jobs_from_website(website_url, max_jobs)
+                                
+                                if scraped_df is not None and not scraped_df.empty:
+                                    st.success(f"Successfully scraped {len(scraped_df)} job postings!")
+                                    
+                                    # Show preview
+                                    st.write("#### Scraped Job Data Preview")
+                                    st.dataframe(scraped_df.head())
+                                    
+                                    # Option to add to database
+                                    if st.button("Add Scraped Jobs to Database"):
+                                        add_multiple_job_postings(scraped_df)
+                                        st.success("Scraped jobs added to database!")
+                                        st.info("Refresh the page to see the updated data.")
+                                else:
+                                    st.warning("No job data could be scraped from the website.")
+                            except Exception as e:
+                                st.error(f"Error scraping website: {e}")
+        
+        with live_tabs[2]:  # External Imports
+            st.write("### Import from External Sources")
+            
+            import_col1, import_col2 = st.columns([1, 1])
+            
+            with import_col1:
+                st.write("#### LinkedIn Jobs Export")
+                linkedin_file = st.file_uploader("Upload LinkedIn Jobs CSV", type=["csv"])
+                
+                if linkedin_file is not None:
+                    try:
+                        linkedin_df = import_jobs_from_linkedin_export(linkedin_file)
+                        
+                        if linkedin_df is not None and not linkedin_df.empty:
+                            st.success(f"Successfully imported {len(linkedin_df)} LinkedIn job postings!")
+                            
+                            # Show preview
+                            st.write("#### LinkedIn Data Preview")
+                            st.dataframe(linkedin_df.head())
+                            
+                            # Option to add to database
+                            if st.button("Add LinkedIn Jobs to Database"):
+                                add_multiple_job_postings(linkedin_df)
+                                st.success("LinkedIn jobs added to database!")
+                                st.info("Refresh the page to see the updated data.")
+                        else:
+                            st.warning("No job data could be imported from the LinkedIn file.")
+                    except Exception as e:
+                        st.error(f"Error importing LinkedIn data: {e}")
+            
+            with import_col2:
+                st.write("#### Indeed Jobs Export")
+                indeed_file = st.file_uploader("Upload Indeed Jobs CSV", type=["csv"])
+                
+                if indeed_file is not None:
+                    try:
+                        indeed_df = import_jobs_from_indeed_export(indeed_file)
+                        
+                        if indeed_df is not None and not indeed_df.empty:
+                            st.success(f"Successfully imported {len(indeed_df)} Indeed job postings!")
+                            
+                            # Show preview
+                            st.write("#### Indeed Data Preview")
+                            st.dataframe(indeed_df.head())
+                            
+                            # Option to add to database
+                            if st.button("Add Indeed Jobs to Database"):
+                                add_multiple_job_postings(indeed_df)
+                                st.success("Indeed jobs added to database!")
+                                st.info("Refresh the page to see the updated data.")
+                        else:
+                            st.warning("No job data could be imported from the Indeed file.")
+                    except Exception as e:
+                        st.error(f"Error importing Indeed data: {e}")
+            
+            # General import information
+            st.info("""
+            **How to Export Jobs from LinkedIn/Indeed:**
+            
+            1. Save your job searches to a collection
+            2. Use the export functionality in your jobs/applications section
+            3. Download as CSV and upload here
+            
+            This feature allows you to incorporate your personal job search data into the analysis.
+            """)
+            
+    with tabs[13]:  # Resume Analysis Tab
+        st.subheader("Resume Skills Analysis")
+        
+        resume_col1, resume_col2 = st.columns([1, 2])
+        
+        with resume_col1:
+            # Resume text input
+            st.write("### Upload Your Resume")
+            resume_text = st.text_area(
+                "Paste resume text here",
+                height=300,
+                help="Copy and paste the text content of your resume here for analysis"
+            )
+            
+            analyze_button = st.button("Analyze Resume Skills")
+        
+        with resume_col2:
+            if analyze_button and resume_text:
+                with st.spinner("Analyzing resume skills..."):
+                    # Extract skills from resume
+                    resume_skills = extract_resume_skills(resume_text)
+                    
+                    if resume_skills:
+                        st.success(f"Found {len(resume_skills)} skills in your resume!")
+                        
+                        # Display skills
+                        st.write("### Skills Found in Your Resume")
+                        
+                        # Create columns for skills
+                        skill_cols = st.columns(3)
+                        
+                        for i, skill in enumerate(sorted(resume_skills)):
+                            col_idx = i % 3
+                            with skill_cols[col_idx]:
+                                st.write(f"✓ {skill}")
+                        
+                        # Compare with market demand
+                        st.write("### Market Demand Analysis")
+                        
+                        # Process data for skill analysis if needed
+                        skill_data = display_data.copy()
+                        if 'skills' not in skill_data.columns:
+                            skill_data = extract_skills_from_jobs(skill_data)
+                        
+                        # Compare resume to market demand
+                        market_analysis = compare_resume_to_market(resume_skills, skill_data)
+                        
+                        # Show match percentage
+                        st.metric(
+                            "Market Match Score", 
+                            f"{market_analysis['match_percentage']:.1f}%",
+                            help="How well your skills match current market demand"
+                        )
+                        
+                        # Create skill gap visualization
+                        gap_fig = plot_skill_gap_analysis(market_analysis)
+                        st.plotly_chart(gap_fig, use_container_width=True)
+                        
+                        # Missing key skills
+                        if market_analysis['missing_key_skills']:
+                            st.write("### Missing High-Demand Skills")
+                            st.info("Consider adding these high-demand skills to your resume or skillset:")
+                            
+                            missing_cols = st.columns(3)
+                            for i, skill in enumerate(market_analysis['missing_key_skills'][:9]):  # Show top 9
+                                col_idx = i % 3
+                                with missing_cols[col_idx]:
+                                    st.write(f"→ {skill}")
+                        
+                        # Find matching job types
+                        matching_jobs = find_matching_job_types(resume_skills, skill_data)
+                        
+                        if not matching_jobs.empty:
+                            st.write("### Best Matching Job Types for Your Skills")
+                            
+                            # Create bar chart of job type matches
+                            job_match_fig = plot_job_type_matches(matching_jobs)
+                            st.plotly_chart(job_match_fig, use_container_width=True)
+                            
+                            # Skill improvement recommendations
+                            recommendations = generate_skill_improvement_recommendations(
+                                {'resume_skills': resume_skills, 'job_type_matches': matching_jobs},
+                                skill_data
+                            )
+                            
+                            st.write("### Skill Improvement Recommendations")
+                            
+                            rec_col1, rec_col2 = st.columns(2)
+                            
+                            with rec_col1:
+                                st.write("**High-Impact Skills to Add:**")
+                                for skill in recommendations['high_impact_skills'][:5]:
+                                    st.write(f"• {skill}")
+                            
+                            with rec_col2:
+                                st.write("**Emerging Skills to Consider:**")
+                                for skill in recommendations['emerging_skills'][:5]:
+                                    st.write(f"• {skill}")
+                    else:
+                        st.warning("No skills were detected in your resume text.")
+                        st.info("Try pasting more content or adding more technical details to your resume.")
+            else:
+                # Show help information when no resume is provided
+                st.info("""
+                ## Resume Skills Analyzer
+                
+                This tool analyzes your resume content to:
+                
+                1. **Extract technical skills** from your resume text
+                2. **Compare your skills** to current job market demand
+                3. **Identify skill gaps** based on job market trends
+                4. **Recommend job types** matching your skill profile
+                5. **Suggest skill improvements** to increase your marketability
+                
+                Paste your resume text in the box on the left and click "Analyze Resume Skills" to get started.
+                """)
+                
+    with tabs[14]:  # Job Alerts Tab
+        st.subheader("Personalized Job Alerts")
+        
+        # Create tabs for different alert features
+        alert_tabs = st.tabs(["Create Alert", "Saved Alerts", "Matching Jobs"])
+        
+        with alert_tabs[0]:  # Create Alert tab
+            st.write("### Create a New Job Alert")
+            
+            # Option to use natural language or detailed preferences
+            preference_input = st.radio(
+                "How would you like to set your preferences?",
+                ["Natural Language Description", "Detailed Preferences"],
+                help="Choose how to specify your job preferences"
+            )
+            
+            if preference_input == "Natural Language Description":
+                # Natural language input
+                nl_description = st.text_area(
+                    "Describe your ideal job",
+                    height=150,
+                    placeholder="E.g., I'm looking for a remote full-stack developer role using React and Node.js, preferably at a startup or tech company.",
+                    help="Describe the type of job you're looking for in your own words"
+                )
+                
+                extract_button = st.button("Extract Preferences")
+                
+                if extract_button and nl_description:
+                    with st.spinner("Analyzing your preferences..."):
+                        # Extract preferences from text
+                        preferences = extract_user_preferences_from_text(nl_description)
+                        
+                        # Show extracted preferences
+                        st.success("Successfully extracted your preferences!")
+                        
+                        # Display preferences in columns
+                        pref_col1, pref_col2 = st.columns(2)
+                        
+                        with pref_col1:
+                            st.write("#### Job Details")
+                            if 'job_types' in preferences:
+                                st.write(f"**Job Types:** {', '.join(preferences['job_types'])}")
+                            if 'skills' in preferences:
+                                st.write(f"**Skills:** {', '.join(preferences['skills'])}")
+                            if 'experience_level' in preferences:
+                                st.write(f"**Experience Level:** {preferences['experience_level']}")
+                        
+                        with pref_col2:
+                            st.write("#### Company & Location")
+                            if 'companies' in preferences:
+                                st.write(f"**Preferred Companies:** {', '.join(preferences['companies'])}")
+                            if 'locations' in preferences:
+                                st.write(f"**Locations:** {', '.join(preferences['locations'])}")
+                            if 'remote' in preferences:
+                                st.write(f"**Remote Work:** {'Yes' if preferences['remote'] else 'No preference'}")
+                        
+                        # Option to save alert
+                        alert_name = st.text_input("Alert Name", placeholder="E.g., Remote Full-Stack Jobs")
+                        
+                        if st.button("Save Alert") and alert_name:
+                            saved = save_user_alert(preferences, alert_name)
+                            if saved:
+                                st.success(f"Alert '{alert_name}' saved successfully!")
+                                st.info("You can view and manage your saved alerts in the 'Saved Alerts' tab.")
+                            else:
+                                st.error("Failed to save alert. Please try again with a different name.")
+                                
+                        # Show matching jobs
+                        st.write("### Matching Jobs")
+                        matching_jobs = create_job_alert(display_data, preferences)
+                        
+                        if not matching_jobs.empty:
+                            st.success(f"Found {len(matching_jobs)} matching jobs!")
+                            st.dataframe(matching_jobs)
+                            
+                            # Show distribution of matching jobs
+                            st.write("### Match Distribution")
+                            match_fig = plot_preference_match_distribution(display_data, preferences)
+                            st.plotly_chart(match_fig, use_container_width=True)
+                        else:
+                            st.info("No matching jobs found for your preferences.")
+                            st.write("Try broadening your preferences or adding more job postings to the database.")
+            
+            else:  # Detailed Preferences
+                st.write("#### Set Your Job Preferences")
+                
+                # Create columns for preference inputs
+                detail_col1, detail_col2 = st.columns(2)
+                
+                with detail_col1:
+                    # Job type preferences
+                    selected_job_types = st.multiselect(
+                        "Job Types",
+                        options=display_data['job_type'].unique().tolist(),
+                        help="Select one or more job types you're interested in"
+                    )
+                    
+                    # Skills preferences
+                    skills_input = st.text_input(
+                        "Required Skills (comma-separated)",
+                        placeholder="E.g., Python, React, SQL, AWS",
+                        help="Enter skills that you want to be mentioned in job postings"
+                    )
+                    
+                    # Experience level
+                    experience = st.selectbox(
+                        "Experience Level",
+                        ["Any", "Entry Level", "Mid Level", "Senior", "Lead/Manager"],
+                        help="Select your preferred experience level"
+                    )
+                
+                with detail_col2:
+                    # Company preferences
+                    selected_companies = st.multiselect(
+                        "Preferred Companies",
+                        options=display_data['company'].unique().tolist(),
+                        help="Select one or more companies you're interested in"
+                    )
+                    
+                    # Location preferences
+                    regions = [
+                        "Any", "US West", "US East", "US Central", 
+                        "North America", "Europe", "Asia", "Australia"
+                    ]
+                    selected_regions = st.multiselect(
+                        "Preferred Regions",
+                        options=regions,
+                        help="Select one or more regions you're interested in"
+                    )
+                    
+                    # Remote preference
+                    remote_preference = st.radio(
+                        "Remote Work",
+                        ["No Preference", "Remote Only", "Hybrid", "On-site"],
+                        help="Select your remote work preference"
+                    )
+                
+                # Build preferences dict
+                if st.button("Create Alert from Preferences"):
+                    manual_preferences = {}
+                    
+                    # Add selected preferences to dict
+                    if selected_job_types:
+                        manual_preferences['job_types'] = selected_job_types
+                    
+                    if skills_input:
+                        manual_preferences['skills'] = [s.strip() for s in skills_input.split(',')]
+                    
+                    if experience != "Any":
+                        manual_preferences['experience_level'] = experience
+                    
+                    if selected_companies:
+                        manual_preferences['companies'] = selected_companies
+                    
+                    if selected_regions and "Any" not in selected_regions:
+                        manual_preferences['locations'] = selected_regions
+                    
+                    if remote_preference == "Remote Only":
+                        manual_preferences['remote'] = True
+                    elif remote_preference == "On-site":
+                        manual_preferences['remote'] = False
+                    
+                    # Create alert from manual preferences
+                    alert_name = st.text_input("Alert Name", placeholder="E.g., Senior Dev Jobs")
+                    
+                    if alert_name:
+                        saved = save_user_alert(manual_preferences, alert_name)
+                        if saved:
+                            st.success(f"Alert '{alert_name}' saved successfully!")
+                            st.info("You can view and manage your saved alerts in the 'Saved Alerts' tab.")
+                        else:
+                            st.error("Failed to save alert. Please try again with a different name.")
+                    
+                    # Show matching jobs
+                    matching_jobs = create_job_alert(display_data, manual_preferences)
+                    
+                    if not matching_jobs.empty:
+                        st.success(f"Found {len(matching_jobs)} matching jobs!")
+                        st.dataframe(matching_jobs)
+                        
+                        # Show distribution of matching jobs
+                        st.write("### Match Distribution")
+                        match_fig = plot_preference_match_distribution(display_data, manual_preferences)
+                        st.plotly_chart(match_fig, use_container_width=True)
+                    else:
+                        st.info("No matching jobs found for your preferences.")
+                        st.write("Try broadening your preferences or adding more job postings to the database.")
+        
+        with alert_tabs[1]:  # Saved Alerts tab
+            st.write("### Your Saved Job Alerts")
+            
+            # Get saved alerts
+            saved_alerts = get_saved_alerts()
+            
+            if saved_alerts:
+                # Create columns for each alert
+                for i, (alert_name, preferences) in enumerate(saved_alerts.items()):
+                    with st.expander(f"Alert: {alert_name}"):
+                        # Display alert details
+                        st.write("#### Alert Details")
+                        
+                        # Build display of preferences
+                        pref_details = []
+                        
+                        if 'job_types' in preferences:
+                            pref_details.append(f"**Job Types:** {', '.join(preferences['job_types'])}")
+                        
+                        if 'skills' in preferences:
+                            pref_details.append(f"**Skills:** {', '.join(preferences['skills'])}")
+                        
+                        if 'experience_level' in preferences:
+                            pref_details.append(f"**Experience Level:** {preferences['experience_level']}")
+                        
+                        if 'companies' in preferences:
+                            pref_details.append(f"**Preferred Companies:** {', '.join(preferences['companies'])}")
+                        
+                        if 'locations' in preferences:
+                            pref_details.append(f"**Locations:** {', '.join(preferences['locations'])}")
+                        
+                        if 'remote' in preferences:
+                            pref_details.append(f"**Remote Work:** {'Yes' if preferences['remote'] else 'No'}")
+                        
+                        # Display preferences
+                        for detail in pref_details:
+                            st.write(detail)
+                        
+                        # Alert actions
+                        alert_col1, alert_col2 = st.columns(2)
+                        
+                        with alert_col1:
+                            # Check for new matches
+                            if st.button(f"Check for New Matches", key=f"check_{alert_name}"):
+                                # Count matching jobs
+                                matching_count = get_matching_job_count(display_data, preferences)
+                                st.success(f"Found {matching_count} matching jobs!")
+                        
+                        with alert_col2:
+                            # Delete alert
+                            if st.button(f"Delete Alert", key=f"delete_{alert_name}"):
+                                deleted = delete_user_alert(alert_name)
+                                if deleted:
+                                    st.success(f"Alert '{alert_name}' deleted!")
+                                    st.rerun()
+                                else:
+                                    st.error("Failed to delete alert. Please try again.")
+            else:
+                st.info("You don't have any saved alerts yet.")
+                st.write("Go to the 'Create Alert' tab to set up job alerts based on your preferences.")
+        
+        with alert_tabs[2]:  # Matching Jobs tab
+            st.write("### Find Matching Jobs")
+            
+            # Select from saved alerts or create temp search
+            search_options = ["Use Saved Alert"] + ["Create Temporary Search"]
+            search_choice = st.radio("Search Method", search_options)
+            
+            if search_choice == "Use Saved Alert":
+                # Get saved alerts
+                saved_alerts = get_saved_alerts()
+                
+                if saved_alerts:
+                    selected_alert = st.selectbox(
+                        "Select Saved Alert",
+                        options=list(saved_alerts.keys())
+                    )
+                    
+                    if selected_alert and st.button("Find Matches"):
+                        alert_preferences = saved_alerts[selected_alert]
+                        
+                        # Get ranked matches
+                        ranked_matches = rank_job_matches(display_data, alert_preferences)
+                        
+                        if not ranked_matches.empty:
+                            st.success(f"Found {len(ranked_matches)} matches for '{selected_alert}'!")
+                            
+                            # Show match quality distribution
+                            match_fig = px.histogram(
+                                ranked_matches,
+                                x="match_score",
+                                nbins=10,
+                                labels={"match_score": "Match Score (%)", "count": "Number of Jobs"},
+                                title="Job Match Quality Distribution",
+                                color_discrete_sequence=["#3366CC"]
+                            )
+                            match_fig.update_layout(xaxis_range=[0, 100])
+                            st.plotly_chart(match_fig, use_container_width=True)
+                            
+                            # Show ranked matches
+                            st.write("#### Ranked Matching Jobs")
+                            st.dataframe(
+                                ranked_matches[['job_title', 'company', 'location', 'match_score', 'date']].sort_values('match_score', ascending=False)
+                            )
+                        else:
+                            st.info("No matching jobs found for this alert.")
+                            st.write("Try broadening your preferences or adding more job postings to the database.")
+                else:
+                    st.info("You don't have any saved alerts yet.")
+                    st.write("Go to the 'Create Alert' tab to set up job alerts based on your preferences.")
+            
+            else:  # Create Temporary Search
+                st.write("#### Quick Job Search")
+                
+                # Quick search fields
+                search_job_types = st.multiselect(
+                    "Job Types",
+                    options=display_data['job_type'].unique().tolist(),
+                    default=[display_data['job_type'].value_counts().index[0]],
+                    help="Select one or more job types"
+                )
+                
+                # Keyword search
+                keywords = st.text_input(
+                    "Keywords (comma-separated)",
+                    placeholder="E.g., Python, cloud, senior",
+                    help="Enter keywords to search for in job titles and descriptions"
+                )
+                
+                # Company filter
+                search_companies = st.multiselect(
+                    "Companies (optional)",
+                    options=display_data['company'].unique().tolist(),
+                    help="Filter by specific companies (leave empty for all)"
+                )
+                
+                # Search button
+                if st.button("Search Jobs"):
+                    # Build search preferences
+                    search_preferences = {}
+                    
+                    if search_job_types:
+                        search_preferences['job_types'] = search_job_types
+                    
+                    if keywords:
+                        search_preferences['skills'] = [k.strip() for k in keywords.split(',')]
+                    
+                    if search_companies:
+                        search_preferences['companies'] = search_companies
+                    
+                    # Get matching jobs
+                    search_results = create_job_alert(display_data, search_preferences)
+                    
+                    if not search_results.empty:
+                        st.success(f"Found {len(search_results)} matching jobs!")
+                        
+                        # Show results
+                        st.write("#### Search Results")
+                        st.dataframe(search_results)
+                        
+                        # Option to save as alert
+                        save_search = st.checkbox("Save this search as an alert")
+                        
+                        if save_search:
+                            alert_name = st.text_input("Alert Name", placeholder="E.g., Quick Search")
+                            
+                            if alert_name and st.button("Save as Alert"):
+                                saved = save_user_alert(search_preferences, alert_name)
+                                if saved:
+                                    st.success(f"Alert '{alert_name}' saved successfully!")
+                                else:
+                                    st.error("Failed to save alert. Please try again with a different name.")
